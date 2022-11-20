@@ -1,0 +1,73 @@
+post:
+  summary: Create Order
+  description: Submit Order Confirmation.
+  tags:
+    - Order
+  consumes:
+    - "application/json"
+  produces:
+    - "application/json"
+  parameters:
+    - name: Authorization
+      in: header
+      description: "Security Token"
+      required: true
+      type: string
+      format: string
+    - name: x-tracking-id
+      in: header
+      description: "Unique Tracking ID for the request."
+      maxLength: 64
+      required: true
+      type: string
+      format: string
+    - name: payload
+      in: body
+      schema:
+        $ref: ../definitions/order/create_order_request.yml
+  responses:
+    200:
+      description: "successful operation"
+      headers:
+        x-tracking-id:
+          description: "Unique Tracking ID for the transaction"
+          format: string
+          required: true
+          maxLength: 36
+          type: string
+      schema:
+        $ref: ../definitions/order/create_order_response.yml
+    400:
+      description: "Bad Request"
+      headers:
+        x-tracking-id:
+          description: "Unique Tracking ID for the request"
+          format: string
+          maxLength: 36
+          type: string
+      schema:
+        $ref: ../definitions/400_error.yml
+    401:
+      description: "Authentication Error"
+      headers:
+        x-tracking-id:
+          description: "Unique Tracking ID for the request"
+          format: string
+          maxLength: 36
+          type: string
+      schema:
+        $ref: ../definitions/401_error.yml
+    404:
+      description: "Not Found"
+      schema:
+        $ref: ../definitions/404_error.yml
+    500:
+      description: "Internal Server Error"
+      headers:
+        x-tracking-id:
+          description: "Unique Tracking ID for the request"
+          format: string
+          maxLength: 36
+          type: string
+      schema:
+        $ref: ../definitions/500_error.yml

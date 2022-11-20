@@ -1,0 +1,13 @@
+type: object
+description: Account update event.
+required:
+  - status_code
+  - status_code_type
+  - events
+properties:
+  status_code:
+    type: string
+    enum: [SUCCESS]
+  status_code_type:
+    type: string
+    enum: [SUCCESS]

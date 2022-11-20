@@ -1,0 +1,14 @@
+properties:
+  status_code:
+    enum:
+      - not_found
+    type: string
+  status_code_type:
+    description: "In case of of missing entities."
+    enum:
+      - ERROR
+    type: string
+required:
+  - status_code
+  - status_code_type
+type: object

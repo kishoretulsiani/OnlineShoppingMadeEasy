@@ -1,0 +1,7 @@
+.idea
+src/main/generated/*
+*.iml
+*.jar
+*.len
+target/*
+build/*

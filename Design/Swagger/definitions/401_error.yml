@@ -1,0 +1,14 @@
+properties:
+  status_code:
+    enum:
+      - UNAUTHORIZED
+    type: string
+  status_code_type:
+    description: "Error Description for the error type. In case of - Unauthorized. Request lacks valid authentication for the target resource."
+    enum:
+      - ERROR
+    type: string
+required:
+    - status_code
+    - status_code_type
+type: object

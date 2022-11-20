@@ -1,0 +1,15 @@
+properties:
+  status_code:
+    description: "Any backend System error or internal server error."
+    enum:
+      - SYSTEM_ERROR
+      - INTERNAL_ERROR
+    type: string
+  status_code_type:
+    enum:
+      - ERROR
+    type: string
+required:
+    - status_code
+    - status_code_type
+type: object

@@ -1,0 +1,22 @@
+---
+basePath: /v1
+host: fruits.shoppingmadeeasy.com
+
+
+info:
+  description: "Shopping Made Easy APIs."
+  title: ShoppingMadeEasy
+  version: "1.0.0"
+
+paths:
+  /order:
+    $ref: ./paths/order.yml
+
+schemes:
+  - https
+
+tags:
+  - name: Order
+    description: "Order related apis"
+
+swagger: "2.0"

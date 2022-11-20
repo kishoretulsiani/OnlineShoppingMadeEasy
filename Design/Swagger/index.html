@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Shopping Made Easy APIs</title>
+    <!-- needed for adaptive design -->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--
+    ReDoc doesn't change outer page styles
+    -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Style the tab */
+        div.tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside the tab */
+        div.tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        /* Change background color of buttons on hover */
+        div.tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        div.tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+
+    </style>
+</head>
+<body>
+<div class="tab">
+    <button id="v1-tab" class="tablinks" onclick="javascript:location.href='index.html?type=V1'">Order Service</button>
+    <button id="v2-tab" class="tablinks" onclick="javascript:location.href='index.html?type=V2'">Offers Service</button>
+</div>
+
+<redoc></redoc>
+<script src="https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"></script>
+
+<script>
+    var v1Url = './order-service-apis-v1.yml';
+    var v2Url = './offers-service-apis-v1.yml';
+
+    var url = new URL(window.location.href);
+    var type = url.searchParams.get("type");
+    var specUrl = v1Url;
+    if (type && type == "V1") {
+        specUrl = v1Url;
+        document.getElementById("v1-tab").className += " active";
+    }
+    if (type && type == "V2") {
+        specUrl = v2Url;
+        document.getElementById("v2-tab").className += " active";
+    }
+
+    Redoc.init(specUrl);
+    changeSpec(type)
+
+    function changeSpec(type) {
+        switch (type) {
+            case 'V1' :
+                specUrl = v1Url;
+                Redoc.init(v1Url);
+                document.getElementById("v1-tab").className += " active";
+                break;
+            case 'V2' :
+                specUrl = v2Url;
+                Redoc.init(v2Url);
+                document.getElementById("v2-tab").className += " active";
+                break;
+            default :
+                specUrl = v1Url;
+                Redoc.init(v1Url);
+                document.getElementById("v1-tab").className += " active";
+        }
+        Redoc.init(specUrl);
+        evt.currentTarget.className += " active";
+    }
+
+</script>
+</body>
+</html>

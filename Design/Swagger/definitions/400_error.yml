@@ -1,0 +1,15 @@
+properties:
+  status_code:
+    enum:
+     - missing_<fieldname>
+     - invalid_<fieldname>
+    type: string
+  status_code_type:
+    description: "Error Description for the error type. In case of - missing_fieldname and invalid_fieldname, the `fieldname` will be replaced with name of the missing field."
+    enum:
+      - ERROR
+    type: string
+required:
+    - status_code
+    - status_code_type
+type: object
