@@ -1,7 +1,12 @@
 .idea
-src/main/generated/*
 *.iml
 *.jar
 *.len
+*.gz
 target/*
-build/*
+gateway-service/target/*
+gateway-service/generated/*
+gateway-service/logs/*
+orders-service/target/*
+orders-service/generated/*
+orders-service/logs/*

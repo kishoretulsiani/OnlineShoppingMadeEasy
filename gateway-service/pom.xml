@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <parent>
+        <groupId>org.shopping.company</groupId>
+        <artifactId>OnlineShoppingMadeEasy</artifactId>
+        <version>${module_version}</version>
+    </parent>
+
+    <artifactId>gateway-service</artifactId>
+
+    <properties>
+        <maven.build.timestamp.format>EEEE, MMM dd, yyyy HH:mm:ss Z</maven.build.timestamp.format>
+        <!--suppress UnresolvedMavenProperty -->
+        <app.build.branch>${git.branch}</app.build.branch>
+        <app.build.timeStamp>${maven.build.timestamp}</app.build.timeStamp>
+        <!--suppress UnresolvedMavenProperty -->
+        <app.build.gitHashShort>${git.commit.id.abbrev}</app.build.gitHashShort>
+        <!--suppress UnresolvedMavenProperty -->
+        <app.build.gitHashFull>${git.commit.id}</app.build.gitHashFull>
+        <!--suppress UnresolvedMavenProperty -->
+        <app.build.commitName>${git.commit.user.name}</app.build.commitName>
+    </properties>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+
+        <plugins>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                        <version>${io.commons.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <!--<mainClass>VerticleLoader</mainClass>-->
+                                    <manifestEntries>
+                                        <Main-Class>
+                                            org.shopping.company.gateway.ApplicationLauncher
+                                        </Main-Class>
+                                        <Main-Verticle>
+                                            org.shopping.company.gateway.verticle.DeployVerticle
+                                        </Main-Verticle>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+
+
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <outputFile>${project.build.directory}/app.jar</outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven.resources.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                        <version>${io.commons.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>copy-war</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/appBundle</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/target</directory>
+                                    <filtering>false</filtering>
+
+                                    <includes>
+                                        <include>app.jar</include>
+                                    </includes>
+
+                                </resource>
+                                <resource>
+                                    <directory>vertx-config</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven.assembly.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                        <version>${io.commons.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>dist</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>${basedir}/assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                        <version>${io.commons.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

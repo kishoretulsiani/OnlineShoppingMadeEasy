@@ -6,8 +6,10 @@ The application helps to quickly build up the online presence for a Fruit shop /
 2. Simple offers
 3. Store and retrieve orders
 
-## Building the project
+# Swagger for the project is available here
+[OnlineShoppingMadeEasy](https://kishoretulsiani.github.io/OnlineShoppingMadeEasy/swagger/index.html)
 
+## Building the project
 
 
 ## Running the project
