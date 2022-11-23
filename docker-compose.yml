@@ -1,0 +1,22 @@
+version: '2'
+services:
+  redis:
+    container_name: redis
+    hostname: redis
+    image: redis
+    command: >
+      --include /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+
+  mongodb:
+    image: mongo:5.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - 27017:27017
+    volumes:
+      - "/opt/mongo/db/data"

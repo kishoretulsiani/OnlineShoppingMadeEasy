@@ -1,0 +1,12 @@
+
+#####
+POST {{gateway-service-host}}/shopping/company/orders
+Authorization: Bearer eyJraWQiOiJyc2FLZVVOSUUyIiwiYWxnIjoiUlM1MTIifQ.eyJzY3AiOlsiXC9wYXltZW50c1wvZGlnaXRhbFwvdipcL3NvclwvKio6OmdldCIsIlwvdjFcL2NyeXB0b1wvKio6OmdldCIsIlwvdjFcL2NyeXB0b1wvKio6OnBvc3QiXSwic3ViIjoiNDI5ZjI3NGEtNDNjNS0zMmUzLTgyYjgtZWMwNzk5ZDU0MDY5IiwidmVyIjoiMS4wIiwiaXNzIjoiQW1leElEYWFTSUQiLCJ0eXAiOiJhcHAiLCJleHAiOjE2NjkxNTY1NzYsImp0aSI6IjVlMzgyZWM5LTg2ZGYtNDkzNC05YWE0LTZhNDJkYzIwYzA5MSJ9.SL67XTgXQ7Xbr22HvKT297i8jrsgRQuVZqj/YhP0jh2OIS0TURQZlDPdEGhJumCL2GZijX9RNz5Jd1mx2SVweaiJg7a6pTDLkMPTeVPRAMLASPcduXUWwotfXBt2dQ7c5vt3DIGMUPutAuY4v5r0ouwihQo6NYcNyzee61G395c99egH8GQMWc1rZanJ+vb1tiIZZbRsNqFhaK3ai9Awkr0Thb/bvzPCiymsM5sJvj9Ed7EqbWDb69KcWZ1+G3YStYzGysS++MJDdJfmo57FP4dGXoisbb9gUhf5eHI15VzLPPvfe+ECp9YbxM/p5Ge/LkPIzRMHo8Y7hTm3XTmf2g==
+x-tracking-id: {{$uuid}}
+Content-Type: application/json
+
+{
+  "key": "value"
+}
+
+###
