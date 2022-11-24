@@ -10,10 +10,10 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.serviceproxy.ServiceException;
 import org.shopping.common.components.constants.ServiceAlerts;
-import org.shopping.common.components.utils.ErrorResponseHelper;
-import org.shopping.common.components.workflow.Context;
 import org.shopping.company.gateway.constants.GatewayConstant;
+import org.shopping.company.services.orders.workflow.Context;
 import org.shopping.company.services.orders.workflow.CreateOrderWorkflow;
+import org.shopping.company.services.orders.workflow.WorkflowErrorResponseHelper;
 
 public class OrdersServiceImpl implements OrdersService {
 
@@ -29,6 +29,7 @@ public class OrdersServiceImpl implements OrdersService {
 
         Context context = new Context();
         try {
+            context.setRequestObject(request);
             CreateOrderWorkflow createOrderWorkflow = new CreateOrderWorkflow(context);
             createOrderWorkflow.execute()
                     .thenAccept(workflowContext -> {
@@ -41,9 +42,9 @@ public class OrdersServiceImpl implements OrdersService {
                     .exceptionally(throwable -> {
                         asyncResultHandler.handle(
                                 ServiceException.fail(
-                                        ServiceAlerts.INTERNAL_API_ERROR.getAlertCode(),
+                                        ServiceAlerts.INTERNAL_ERROR.getAlertCode(),
                                         throwable.getMessage(),
-                                        ErrorResponseHelper.getErrorDetails(throwable, context)
+                                        WorkflowErrorResponseHelper.getErrorDetails(throwable, context)
                                 )
                         );
                         return null;
@@ -51,9 +52,9 @@ public class OrdersServiceImpl implements OrdersService {
         } catch (Exception exception) {
             asyncResultHandler.handle(
                     ServiceException.fail(
-                            ServiceAlerts.INTERNAL_API_ERROR.getAlertCode(),
+                            ServiceAlerts.INTERNAL_ERROR.getAlertCode(),
                             exception.getMessage(),
-                            ErrorResponseHelper.getErrorDetails(exception, context)
+                            WorkflowErrorResponseHelper.getErrorDetails(exception, context)
                     )
             );
         }

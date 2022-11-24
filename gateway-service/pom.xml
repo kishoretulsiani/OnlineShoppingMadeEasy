@@ -38,6 +38,12 @@
             <artifactId>common-components</artifactId>
             <version>${module_version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.shopping.company</groupId>
+            <artifactId>fruitsshop-datamodel</artifactId>
+            <version>${module_version}</version>
+        </dependency>
     </dependencies>
 
 
@@ -77,7 +83,7 @@
                                     <!--<mainClass>VerticleLoader</mainClass>-->
                                     <manifestEntries>
                                         <Main-Class>
-                                            org.shopping.company.gateway.ApplicationLauncher
+                                            io.vertx.core.Launcher
                                         </Main-Class>
                                         <Main-Verticle>
                                             org.shopping.company.gateway.verticle.DeployVerticle

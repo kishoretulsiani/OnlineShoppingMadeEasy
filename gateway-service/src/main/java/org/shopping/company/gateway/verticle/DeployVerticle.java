@@ -4,6 +4,7 @@ package org.shopping.company.gateway.verticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
@@ -20,6 +21,8 @@ import org.shopping.common.components.constants.ResponseStatusMapper;
 import org.shopping.common.components.mongo.MongoDB;
 import org.shopping.common.components.redis.RedisCache;
 import org.shopping.company.gateway.constants.GatewayConstant;
+import org.shopping.company.gateway.dummydata.InsertDummyDataMongoDB;
+import org.shopping.company.gateway.dummydata.InsertDummyDataRedis;
 import org.shopping.company.gateway.handler.ExceptionHandler;
 import org.shopping.company.gateway.handler.ResponseHandler;
 import org.shopping.company.services.orders.OrdersService;
@@ -85,10 +88,10 @@ public class DeployVerticle extends AbstractVerticle {
         Map<String, String> env = System.getenv();
 
         // initializing MongoDB
-        Future mongoFuture = MongoDB.initialize(vertx);
+        Future mongoFuture = MongoDB.initialize(vertx).compose(unused -> InsertDummyDataMongoDB.execute(vertx));
 
         // initializing Redis
-        Future redisFuture = RedisCache.initialize(vertx);
+        Future redisFuture = RedisCache.initialize(vertx).compose(unused -> InsertDummyDataRedis.execute(vertx));
 
         // initializing OrderService
         OrdersService.register(vertx);
@@ -104,25 +107,31 @@ public class DeployVerticle extends AbstractVerticle {
         router.post(BASE_PATH + ORDERS_API).handler(this::handleOrdersRequest);
         router.get("/health").handler(this::healthCheck);
 
+        // Starting httpserver after core components are initialized successfully.
         CompositeFuture.join(mongoFuture, redisFuture).setHandler(result -> {
-            vertx.createHttpServer().requestHandler(router).listen(8080, ar -> {
-                if (ar.succeeded()) {
-                    logger.info("HTTP server listening on port {}", 8080);
-                    startPromise.complete();
-                } else {
-                    logger.error("HTTP server fail to start {}", ar.cause().toString());
-                    startPromise.fail(ar.cause());
-                }
-            });
+            if (result.succeeded()) {
+                vertx.createHttpServer().requestHandler(router).listen(8080, ar -> {
+                    if (ar.succeeded()) {
+                        logger.info("HTTP server listening on port {}", 8080);
+                        startPromise.complete();
+                    } else {
+                        logger.error("HTTP server fail to start {}", ar.cause().toString());
+                        startPromise.fail(ar.cause());
+                    }
+                });
+            } else {
+                logger.error("error initializing core components", result.cause().toString());
+            }
         });
     }
 
     private void handleOrdersRequest(RoutingContext routingContext) {
-        JsonObject incomingRequestData = routingContext.getBodyAsJson();
-        logger.info("Order Request Received = " + incomingRequestData.toString());
+        JsonObject incomingRequest = routingContext.getBodyAsJson();
+        MultiMap headers = routingContext.request().headers();
+        logger.info("Order Request Received = " + incomingRequest.toString());
         routingContext.put("apiName", "handleOrdersRequest");
         routingContext.put("startTime", System.currentTimeMillis());
-        ordersService.createOrder(incomingRequestData, ResponseHandler.responseHandler(routingContext));
+        ordersService.createOrder(incomingRequest, ResponseHandler.responseHandler(routingContext));
     }
 
     // health check can be implemented in several ways

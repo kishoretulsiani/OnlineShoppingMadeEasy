@@ -14,7 +14,6 @@ public class ResponseHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DeployVerticle.class);
 
-
     public static <T> Handler<AsyncResult<T>> responseHandler(RoutingContext routingContext) {
 
         return ar -> {
@@ -30,7 +29,7 @@ public class ResponseHandler {
                         .putHeader(GatewayConstant.CONTENT_TYPE, GatewayConstant.APPLICATION_JSON)
                         .setStatusCode(jsonObject.getInteger(GatewayConstant.HTTP_STATUS) == null ? GatewayConstant.HTTP_STATUS_200 : jsonObject.getInteger(GatewayConstant.HTTP_STATUS));
 
-                routingContext.response().end("responsePayload");
+                routingContext.response().end(responsePayload);
 
             } else {
                 logger.info("Failure Response Received From Workflow");
