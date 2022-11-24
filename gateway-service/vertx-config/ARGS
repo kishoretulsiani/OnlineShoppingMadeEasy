@@ -1,0 +1,1 @@
+-conf /opt/app-root/conf_${ENV}.json

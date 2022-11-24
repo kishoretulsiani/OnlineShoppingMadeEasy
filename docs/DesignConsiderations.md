@@ -15,7 +15,7 @@ Project is being built using following technologies.
 
 * Vertx
 * Kotlin
-* Gradle / Maven
+* Maven
 * JUnit
 * GitHub
 * IntelliJ Tools
@@ -26,13 +26,16 @@ Project is being built using following technologies.
 * Current focus is to run the project on the developers local machine with minimal efforts required to setup.
 
 ## Microservices in our Project
+* WebApp Microservice
+* Gateway Microservice
 * Orders Microservice
 * Offers Microservice
+* User Registration Microservice 
 * Token Microservice
-* Inventory Microservice
 * Admin Portal Web Application
-* User Registration Microservice
 * Payments Microservice
+* Inventory Microservice
+* SOR Microservice
 
 ## Databases in our Project
 * Redis Cache
