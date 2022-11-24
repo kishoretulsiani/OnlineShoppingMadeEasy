@@ -1,8 +1,17 @@
 package org.shopping.company.services.orders.workflow;
 
+import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.shopping.common.components.workflow.Context;
+import org.shopping.common.components.constants.ResponseStatus;
+import org.shopping.common.components.constants.ResponseStatusMapper;
+import org.shopping.common.components.constants.ServiceAlerts;
+import org.shopping.company.services.orders.response.CreateOrderResponse;
+import org.shopping.company.services.orders.steps.CalculateOrderAmountsStep;
+import org.shopping.company.services.orders.steps.ConfirmAndUpdateItemsInventoryStep;
+import org.shopping.company.services.orders.steps.CreateOrderStep;
+import org.shopping.company.services.orders.steps.ValidateCreateOrderRequestStep;
+import org.shopping.company.services.orders.steps.ValidateLoggedInUserStep;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -17,45 +26,43 @@ public class CreateOrderWorkflow {
     }
 
     public CompletableFuture<Context> execute() {
+
         logger.info("Workflow Started");
+
         CompletableFuture<Context> workflowFuture = new CompletableFuture();
 
-        step1(context).thenCompose(this::step2).thenCompose(this::step3).thenCompose(this::step4).thenAccept(context1 -> {
-            logger.info("Workflow Completed");
+        // following steps will be executed in sequence to create an order for a customer
 
-            workflowFuture.complete(context);
-        });
+        // validate order received for logged in customer
+        // validate create order request
+        // update inventory of items in db
+        // calculate other order details tax and total amount and create order details in mongo
+        // process payment
+        // create order response
+
+        new ValidateLoggedInUserStep().execute(context)
+                .thenCompose(new ValidateCreateOrderRequestStep()::execute)
+                .thenCompose(new ConfirmAndUpdateItemsInventoryStep()::execute)
+                .thenCompose(new CalculateOrderAmountsStep()::execute)
+                .thenCompose(new CreateOrderStep()::execute)
+                .thenAccept(context1 -> {
+
+                    CreateOrderResponse createOrderResponse = new CreateOrderResponse();
+                    createOrderResponse.setOrder(context.getOrder());
+                    context.setResponsePayload(Json.encode(createOrderResponse));
+
+                    logger.info("Workflow Completed");
+                    ResponseStatus responseStatus = ResponseStatusMapper.getStatusCodeMap().get(ServiceAlerts.SUCCESS.getAlertCode());
+                    context1.setResponseStatus(responseStatus);
+                    workflowFuture.complete(context);
+                }).exceptionally(throwable -> {
+                    logger.error("Error occurred in executing workflow.");
+                    workflowFuture.completeExceptionally(throwable);
+                    return null;
+                });
 
         return workflowFuture;
     }
 
-
-    private CompletableFuture<Context> step1(Context context) {
-        logger.info("Workflow Step1 Executed");
-        CompletableFuture<Context> step1Future = new CompletableFuture();
-        step1Future.complete(context);
-        return step1Future;
-    }
-
-    private CompletableFuture<Context> step2(Context context) {
-        logger.info("Workflow Step2 Executed");
-        CompletableFuture<Context> step2Future = new CompletableFuture();
-        step2Future.complete(context);
-        return step2Future;
-    }
-
-    private CompletableFuture<Context> step3(Context context) {
-        logger.info("Workflow Step3 Executed");
-        CompletableFuture<Context> step3Future = new CompletableFuture();
-        step3Future.complete(context);
-        return step3Future;
-    }
-
-    private CompletableFuture<Context> step4(Context context) {
-        logger.info("Workflow Step4 Executed");
-        CompletableFuture<Context> step4Future = new CompletableFuture();
-        step4Future.complete(context);
-        return step4Future;
-    }
 
 }

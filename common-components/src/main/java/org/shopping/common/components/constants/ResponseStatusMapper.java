@@ -11,8 +11,11 @@ public class ResponseStatusMapper {
     private static final Map<Integer, ResponseStatus> statusCodeMap = new HashMap();
 
     public ResponseStatusMapper() {
-        statusCodeMap.put(1200, new ResponseStatus("not_eligible", "success", 200, Status.BUSINESS_EXCEPTION));
-        statusCodeMap.put(1002, new ResponseStatus("system_error", "error", 500, Status.SYSTEM_EXCEPTION));
+        statusCodeMap.put(ServiceAlerts.SUCCESS.code, new ResponseStatus("not_eligible", "success", 200));
+        statusCodeMap.put(ServiceAlerts.INTERNAL_ERROR.code, new ResponseStatus("system_error", "system_error", 500));
+        statusCodeMap.put(ServiceAlerts.MANDATORY_DATA_MISSING.code, new ResponseStatus("mandatory_data_missing", "mandatory_data_missing", 400));
+        statusCodeMap.put(ServiceAlerts.INVALID_USER.code, new ResponseStatus("not_authorized", "not_authorized", 401));
+        statusCodeMap.put(ServiceAlerts.ITEM_OUT_OF_STOCK.code, new ResponseStatus("item_out_of_stock", "item_out_of_stock", 200));
     }
 
     public static Map<Integer, ResponseStatus> getStatusCodeMap() {
@@ -25,10 +28,6 @@ public class ResponseStatusMapper {
             return statusCodeMap.get(1002);
         }
         return responseStatus;
-    }
-
-    private int getHttpStatus(String status) {
-        return Integer.valueOf(status);
     }
 
 }

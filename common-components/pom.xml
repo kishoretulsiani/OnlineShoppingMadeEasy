@@ -17,28 +17,6 @@
 
     <packaging>jar</packaging>
 
-    <properties>
-        <jackson-jar.version>2.13.3</jackson-jar.version>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson-jar.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson-jar.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson-jar.version}</version>
-        </dependency>
-
-    </dependencies>
     <build>
         <plugins>
             <plugin>

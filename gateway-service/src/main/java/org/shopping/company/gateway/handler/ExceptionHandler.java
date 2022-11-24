@@ -1,14 +1,16 @@
 package org.shopping.company.gateway.handler;
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import com.google.common.base.CaseFormat;
 import io.vertx.core.Handler;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.serviceproxy.ServiceException;
 import org.shopping.common.components.constants.ResponseStatus;
 import org.shopping.common.components.constants.ResponseStatusMapper;
-import org.shopping.common.components.constants.SorConstants;
+import org.shopping.common.components.exception.ApplicationException;
+import org.shopping.company.gateway.constants.GatewayConstant;
 
 
 public class ExceptionHandler implements Handler<RoutingContext> {
@@ -23,27 +25,37 @@ public class ExceptionHandler implements Handler<RoutingContext> {
     @Override
     public void handle(RoutingContext routingContext) {
 
-        if (routingContext.failed()) {
+        ResponseStatus responseStatus;
 
-            Throwable throwable = routingContext.failure();
-            ResponseStatus responseStatus = responseStatusMapper.mapErrorCode(SorConstants.SYSTEM_ERROR);
-            String statusCode = responseStatus.getStatusCode();
-            String errorMessage = throwable.getMessage();
+        int httpStatusCode;
 
-            if (throwable instanceof UnrecognizedPropertyException) {
-                responseStatus = responseStatusMapper.mapErrorCode(SorConstants.INVALID_REQUEST_ERROR);
-                UnrecognizedPropertyException unrecognizedPropertyException =
-                        (UnrecognizedPropertyException) throwable.getCause();
-                statusCode = "invalid_property_" + CaseFormat.UPPER_CAMEL
-                        .to(CaseFormat.LOWER_UNDERSCORE, unrecognizedPropertyException.getPropertyName());
-            }
+        Throwable throwable = routingContext.failure();
 
-            logger.error("Error occured in SOR API. Detailed Message : " + errorMessage, throwable, routingContext.get(SorConstants.TRACKING_ID));
-
-            routingContext.response()
-                    .setStatusCode(responseStatus.getHttpStatus())
-                    .putHeader("Content-Type", "application/json")
-                    .putHeader(SorConstants.TRACKING_ID, (String) routingContext.get(SorConstants.TRACKING_ID));
+        if (throwable instanceof ServiceException) {
+            logger.error("ApplicationException occurred  " + throwable.getMessage());
+            ServiceException exception = (ServiceException) throwable;
+            JsonObject errorInfo = exception.getDebugInfo();
+            responseStatus = responseStatusMapper.mapErrorCode(errorInfo.getInteger("status_code"));
+        } else if (throwable instanceof ApplicationException) {
+            logger.error("ApplicationException occurred  " + throwable.getMessage());
+            ApplicationException exception = (ApplicationException) throwable;
+            responseStatus = responseStatusMapper.mapErrorCode(exception.getResponseCode());
+        } else {
+            logger.error("Some Exception occurred  " + throwable.getMessage());
+            responseStatus = responseStatusMapper.mapErrorCode(1005);
         }
+
+        httpStatusCode = responseStatus.getHttpStatus();
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.put("status_code", responseStatus.getStatusCode());
+        jsonObject.put("status_code_type", responseStatus.getStatusCodeType());
+
+        routingContext.response()
+                .setStatusCode(httpStatusCode)
+                .putHeader("Content-Type", "application/json")
+                .putHeader(GatewayConstant.TRACKING_ID, (String) routingContext.get(GatewayConstant.TRACKING_ID))
+                .end(Json.encode(jsonObject));
+
     }
 }
