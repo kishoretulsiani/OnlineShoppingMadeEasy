@@ -5,31 +5,5 @@
     "ssl.key-store-password": "Kishore1234",
     "ssl.keyStoreType": "JKS",
     "ssl.enabled": true
-  },
-  "couchbase": {
-    "connection": {
-      "failover": true,
-      "primary_nodes": "localhost:9000",
-      "failover_nodes": "localhost:7000"
-    },
-    "env": {
-      "queryEnabled": true,
-      "queryTimeout": 2001,
-      "viewTimeout": 2002,
-      "kvTimeout": 2003,
-      "connectTimeout": 15000,
-      "socketConnectTimeout" : 15000,
-      "disconnectTimeout": 2005,
-      "dnsSvcEnabled": false
-    },
-    "dp_p2p_bucket_config": {
-      "name": "fruits_shop",
-      "operationTimeoutGet": 5000,
-      "bpe.retry.count": 10,
-      "bpe.retry.delay.lower": 2,
-      "bpe.retry.delay.upper": 50,
-      "tfe.retry.count": 1,
-      "tfe.retry.delay": 500
-    }
   }
 }

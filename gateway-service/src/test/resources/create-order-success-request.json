@@ -1,0 +1,18 @@
+{
+  "userId": "userId2",
+  "itemDetails": [
+    {
+      "itemId": "item1",
+      "itemQuantity": "1"
+    },
+    {
+      "itemId": "item2",
+      "itemQuantity": "1"
+    }
+  ],
+  "paymentDetails": {
+    "paymentId": "1234567890",
+    "cvv": "456"
+  },
+  "shippingAddressId": "34987654"
+}

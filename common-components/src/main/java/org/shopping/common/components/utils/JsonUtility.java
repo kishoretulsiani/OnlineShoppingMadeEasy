@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shopping.common.components.exception.ApplicationException;
 
 public class JsonUtility {
+
     private static final JsonUtility INSTANCE = new JsonUtility();
+
     private ObjectMapper mapper = new ObjectMapper();
 
     private JsonUtility() {

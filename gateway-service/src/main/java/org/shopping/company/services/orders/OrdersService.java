@@ -14,7 +14,7 @@ import io.vertx.serviceproxy.ServiceProxyBuilder;
 @ProxyGen
 public interface OrdersService {
 
-    static final String ORDERS_SERVICE_ADDRESS = "service.orders";
+    String ORDERS_SERVICE_ADDRESS = "service.orders";
 
     long DEFAULT_TIMEOUT = 3000L;
 

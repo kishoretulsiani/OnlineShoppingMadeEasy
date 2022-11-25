@@ -6,7 +6,9 @@ import io.vertx.core.logging.LoggerFactory;
 import org.shopping.common.components.constants.ResponseStatus;
 import org.shopping.common.components.constants.ResponseStatusMapper;
 import org.shopping.common.components.constants.ServiceAlerts;
-import org.shopping.company.services.orders.response.CreateOrderResponse;
+import org.shopping.company.services.orders.helpers.DTOHelper;
+import org.shopping.company.services.orders.helpers.DatabaseHelper;
+import org.shopping.company.services.orders.helpers.RedisHelper;
 import org.shopping.company.services.orders.steps.CalculateOrderAmountsStep;
 import org.shopping.company.services.orders.steps.ConfirmAndUpdateItemsInventoryStep;
 import org.shopping.company.services.orders.steps.CreateOrderStep;
@@ -21,6 +23,12 @@ public class CreateOrderWorkflow {
 
     Context context = null;
 
+    DatabaseHelper databaseHelper = new DatabaseHelper();
+
+    DTOHelper dtoHelper = new DTOHelper();
+
+    RedisHelper redisHelper = new RedisHelper();
+
     public CreateOrderWorkflow(Context context) {
         this.context = context;
     }
@@ -31,30 +39,29 @@ public class CreateOrderWorkflow {
 
         CompletableFuture<Context> workflowFuture = new CompletableFuture();
 
+
         // following steps will be executed in sequence to create an order for a customer
 
         // validate order received for logged in customer
         // validate create order request
-        // update inventory of items in db
+        // update inventory of items in db and create order entry
         // calculate other order details tax and total amount and create order details in mongo
         // process payment
         // create order response
 
-        new ValidateLoggedInUserStep().execute(context)
-                .thenCompose(new ValidateCreateOrderRequestStep()::execute)
-                .thenCompose(new ConfirmAndUpdateItemsInventoryStep()::execute)
-                .thenCompose(new CalculateOrderAmountsStep()::execute)
-                .thenCompose(new CreateOrderStep()::execute)
+        new ValidateLoggedInUserStep(databaseHelper, dtoHelper, redisHelper).execute(context)
+                .thenCompose(new ValidateCreateOrderRequestStep(databaseHelper, dtoHelper, redisHelper)::execute)
+                .thenCompose(new ConfirmAndUpdateItemsInventoryStep(databaseHelper, dtoHelper, redisHelper)::execute)
+                .thenCompose(new CalculateOrderAmountsStep(databaseHelper, dtoHelper, redisHelper)::execute)
+                .thenCompose(new CreateOrderStep(databaseHelper, dtoHelper, redisHelper)::execute)
                 .thenAccept(context1 -> {
 
-                    CreateOrderResponse createOrderResponse = new CreateOrderResponse();
-                    createOrderResponse.setOrder(context.getOrder());
-                    context.setResponsePayload(Json.encode(createOrderResponse));
-
+                    context.setResponsePayload(Json.encode(context1.getCreateOrderResponse()));
                     logger.info("Workflow Completed");
                     ResponseStatus responseStatus = ResponseStatusMapper.getStatusCodeMap().get(ServiceAlerts.SUCCESS.getAlertCode());
                     context1.setResponseStatus(responseStatus);
-                    workflowFuture.complete(context);
+                    workflowFuture.complete(context1);
+
                 }).exceptionally(throwable -> {
                     logger.error("Error occurred in executing workflow.");
                     workflowFuture.completeExceptionally(throwable);

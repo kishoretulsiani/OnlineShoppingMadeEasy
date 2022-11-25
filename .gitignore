@@ -4,14 +4,10 @@
 *.len
 *.gz
 target/*
-
+redis/*
 gateway-service/target/*
-gateway-service/generated/*
+gateway-service/src/main/generated/*
 gateway-service/logs/*
-
-orders-service/target/*
-orders-service/generated/*
-orders-service/logs/*
 
 common-components/target/*
 common-components/generated/*
