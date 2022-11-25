@@ -10,6 +10,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.BulkOperation;
 import org.shopping.common.components.mongo.MongoDB;
+import org.shopping.datamodel.beans.DBCollections;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +29,7 @@ public class InsertDummyDataMongoDB {
 
         Promise<Void> userCollectionPromise = Promise.promise();
 
-        MongoDB.getClient().createCollection("APPLICATION_USERS", res -> {
+        MongoDB.getClient().createCollection(DBCollections.APPLICATION_USERS.name(), res -> {
             if (res.succeeded()) {
                 logger.info("APPLICATION_USERS Collection got created successfully");
             } else {
@@ -49,7 +50,7 @@ public class InsertDummyDataMongoDB {
         });
 
         Promise<Void> ordersCollectionPromise = Promise.promise();
-        MongoDB.getClient().createCollection("ORDERS", res -> {
+        MongoDB.getClient().createCollection(DBCollections.ORDERS.name(), res -> {
             if (res.succeeded()) {
                 logger.info("Collection got created successfully");
                 ordersCollectionPromise.complete();
@@ -71,7 +72,7 @@ public class InsertDummyDataMongoDB {
         });
 
         Promise<Void> orderItemsCollectionPromise = Promise.promise();
-        MongoDB.getClient().createCollection("ORDER_ITEMS", res -> {
+        MongoDB.getClient().createCollection(DBCollections.APPLICATION_USERS.name(), res -> {
             if (res.succeeded()) {
                 logger.info("Collection got created successfully");
                 orderItemsCollectionPromise.complete();
@@ -124,7 +125,7 @@ public class InsertDummyDataMongoDB {
         List<BulkOperation> operations = Arrays.asList(
                 bulkReplace1, bulkReplace2);
 
-        MongoDB.getClient().bulkWrite("APPLICATION_USERS", operations, user1Result -> {
+        MongoDB.getClient().bulkWrite(DBCollections.APPLICATION_USERS.name(), operations, user1Result -> {
             if (user1Result.succeeded()) {
                 logger.info("user1 replaced !");
                 usersInsertPromise.complete();
@@ -166,7 +167,7 @@ public class InsertDummyDataMongoDB {
         List<BulkOperation> itemOperations = Arrays.asList(
                 bulkReplaceItem1, bulkReplaceItem2);
 
-        MongoDB.getClient().bulkWrite("ORDER_ITEMS", itemOperations, itemResults -> {
+        MongoDB.getClient().bulkWrite(DBCollections.ORDER_ITEMS.name(), itemOperations, itemResults -> {
             if (itemResults.succeeded()) {
                 logger.info("user1 replaced !");
                 itemsInsertPromise.complete();

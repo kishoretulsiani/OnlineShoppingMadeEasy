@@ -24,37 +24,6 @@ public class ApplicationException extends RuntimeException {
 
     }
 
-    public ApplicationException(int responseCode, String responseMsg, Throwable errorCause, String[] errorArgs) {
-        super(responseMsg, errorCause);
-        this.errorArgs = errorArgs;
-        this.responseCode = responseCode;
-        this.responseMsg = responseMsg;
-        if (errorCause != null) {
-            this.errorCause = ExceptionUtils.getStackTrace(errorCause);
-        } else {
-            this.errorCause = null;
-        }
-
-    }
-
-    public ApplicationException(int responseCode, String responseMsg, Throwable errorCause, String[] errorArgs, Integer errorStrategy) {
-        super(responseMsg, errorCause);
-        if (errorStrategy != null && errorStrategy != 0) {
-            this.responseCode = responseCode + errorStrategy;
-        } else {
-            this.responseCode = responseCode;
-        }
-
-        this.responseMsg = responseMsg;
-        this.errorArgs = errorArgs;
-        if (errorCause != null) {
-            this.errorCause = ExceptionUtils.getStackTrace(errorCause);
-        } else {
-            this.errorCause = null;
-        }
-
-    }
-
     public String[] getErrorArgs() {
         return this.errorArgs;
     }

@@ -3,11 +3,12 @@ package org.shopping.company.services.orders.steps;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.shopping.common.components.constants.ServiceAlerts;
-import org.shopping.common.components.exception.ApplicationException;
-import org.shopping.common.components.mongo.MongoDB;
+import org.shopping.company.services.orders.helpers.DTOHelper;
+import org.shopping.company.services.orders.helpers.DatabaseHelper;
+import org.shopping.company.services.orders.helpers.RedisHelper;
 import org.shopping.company.services.orders.request.CreateOrderRequest;
 import org.shopping.company.services.orders.workflow.Context;
+import org.shopping.company.services.orders.workflow.WorkflowStep;
 import org.shopping.datamodel.beans.OrderAmountSummary;
 import org.shopping.datamodel.beans.OrderItem;
 
@@ -15,11 +16,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class CalculateOrderAmountsStep implements WorkflowStep {
 
     private final Logger logger = LoggerFactory.getLogger(CalculateOrderAmountsStep.class);
+
+    DatabaseHelper databaseHelper;
+
+    DTOHelper dtoHelper;
+
+    RedisHelper redisHelper;
+
+
+    public CalculateOrderAmountsStep(DatabaseHelper databaseHelper, DTOHelper dtoHelper, RedisHelper redisHelper) {
+        this.databaseHelper = databaseHelper;
+        this.dtoHelper = dtoHelper;
+        this.redisHelper = redisHelper;
+    }
 
     public static OrderItem objectMapper(JsonObject jsonObject) {
 
@@ -59,7 +72,7 @@ public class CalculateOrderAmountsStep implements WorkflowStep {
         orderAmountSummary.setTotalTax(String.valueOf(totalTax));
         orderAmountSummary.setGrandTotal(String.valueOf(grandTotal));
 
-        context.setOrderAmountSummary(orderAmountSummary);
+        context.getOrder().setOrderAmountSummary(orderAmountSummary);
 
 
     }
@@ -74,38 +87,16 @@ public class CalculateOrderAmountsStep implements WorkflowStep {
 
         ArrayList<OrderItem> requestOrderItemArrayList = createOrderRequest.getItemDetails();
 
+        databaseHelper.getOrderItems(requestOrderItemArrayList).thenAccept(orderItems -> {
 
-        ArrayList<String> itemIds = new ArrayList();
-        requestOrderItemArrayList.forEach(orderItem -> {
-            itemIds.add(orderItem.getItemId());
-        });
+            createOrderAmountsSummary(orderItems, requestOrderItemArrayList, context);
 
-        HashMap<String, Integer> itemIdAndQuantity = new HashMap<>();
-        requestOrderItemArrayList.forEach(orderItem -> {
-            itemIdAndQuantity.put(orderItem.getItemId(), Integer.valueOf(orderItem.getItemQuantity()));
-        });
+            dtoHelper.updateOrderQuantity(requestOrderItemArrayList, orderItems);
 
-        JsonObject queryParam = new JsonObject()
-                .put("itemId", new JsonObject().put("$in", itemIds));
+            context.getOrder().setOrderItems(orderItems);
 
-        MongoDB.getClient().find("ORDER_ITEMS", queryParam, result -> {
-            if (result.succeeded()) {
-                List<JsonObject> itemArrayList = result.result();
+            databaseHelper.orderCreateUpsert(context.getOrder(), context).thenAccept(aBoolean -> calculateOrderAmountsStepFuture.complete(context));
 
-                List<OrderItem> orderItemList = itemArrayList.stream().map(CalculateOrderAmountsStep::objectMapper).collect(Collectors.toList());
-
-                orderItemList.forEach(orderItem -> orderItem.setItemQuantity(String.valueOf(itemIdAndQuantity.get(orderItem.getItemId()))));
-
-                context.setOrderItemList(orderItemList);
-
-                createOrderAmountsSummary(orderItemList, requestOrderItemArrayList, context);
-
-                logger.info("got all item details successfully... ");
-
-                calculateOrderAmountsStepFuture.complete(context);
-            } else {
-                calculateOrderAmountsStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
-            }
         });
 
         return calculateOrderAmountsStepFuture;

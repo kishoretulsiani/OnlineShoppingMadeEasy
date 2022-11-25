@@ -6,7 +6,8 @@
     <option name="MAIN_CLASS_NAME" value="io.vertx.core.Launcher" />
     <module name="gateway-service" />
     <option name="PROGRAM_PARAMETERS" value="run org.shopping.company.gateway.verticle.DeployVerticle -conf vertx-config/conf_e0.json" />
-    <option name="VM_PARAMETERS" value="-Dlog4j2.configurationFile=log4j2.properties -Dlog4j2.level=info -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -Dvertx.disableFileCPResolving=&quot;true&quot; -Dvertx.disableDnsResolver=&quot;true&quot; -Xms512m -Xmx2048m -XX:MaxMetaspaceSize=256m -XX:MetaspaceSize=256m -Dvertx.options.eventLoopPoolSize=2" />
+    <option name="VM_PARAMETERS"
+            value="-Dlog4j2.configurationFile=log4j2.properties -Dlog4j2.level=info -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -Dvertx.disableFileCPResolving=&quot;true&quot; -Dvertx.disableDnsResolver=&quot;true&quot; -Xms512m -Xmx2048m -XX:MaxMetaspaceSize=256m -XX:MetaspaceSize=256m"/>
     <option name="WORKING_DIRECTORY" value="$MODULE_WORKING_DIR$" />
     <method v="2">
       <option name="Make" enabled="true" />

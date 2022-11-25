@@ -2,11 +2,13 @@ package org.shopping.company.services.orders.steps;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.shopping.common.components.constants.ServiceAlerts;
-import org.shopping.common.components.exception.ApplicationException;
-import org.shopping.common.components.redis.RedisCache;
+import org.shopping.company.services.orders.helpers.DTOHelper;
+import org.shopping.company.services.orders.helpers.DatabaseHelper;
+import org.shopping.company.services.orders.helpers.RedisHelper;
 import org.shopping.company.services.orders.request.CreateOrderRequest;
 import org.shopping.company.services.orders.workflow.Context;
+import org.shopping.company.services.orders.workflow.WorkflowStep;
+import org.shopping.datamodel.beans.Order;
 import org.shopping.datamodel.beans.OrderItem;
 
 import java.util.ArrayList;
@@ -16,6 +18,17 @@ public class ConfirmAndUpdateItemsInventoryStep implements WorkflowStep {
 
     private final Logger logger = LoggerFactory.getLogger(ConfirmAndUpdateItemsInventoryStep.class);
 
+    DatabaseHelper databaseHelper;
+
+    DTOHelper dtoHelper;
+
+    RedisHelper redisHelper;
+
+    public ConfirmAndUpdateItemsInventoryStep(DatabaseHelper databaseHelper, DTOHelper dtoHelper, RedisHelper redisHelper) {
+        this.databaseHelper = databaseHelper;
+        this.dtoHelper = dtoHelper;
+        this.redisHelper = redisHelper;
+    }
 
     @Override
     public CompletableFuture<Context> execute(Context context) {
@@ -29,41 +42,26 @@ public class ConfirmAndUpdateItemsInventoryStep implements WorkflowStep {
 
         ArrayList<CompletableFuture<Void>> completableFutureArrayList = new ArrayList<>();
 
-        for (OrderItem orderItem : orderItemArrayList) {
+        ArrayList<CompletableFuture<Boolean>> updateInventoryFutureList = new ArrayList<>();
 
-            CompletableFuture<Void> itemInventoryUpdateCompletableFuture = new CompletableFuture();
-            completableFutureArrayList.add(itemInventoryUpdateCompletableFuture);
+        orderItemArrayList.forEach(orderItem -> {
+            redisHelper.getItemInventoryIfExists(orderItem.getItemId(), orderItem.getItemQuantity())
+                    .thenCompose(itemInventory -> {
+                        updateInventoryFutureList.add(redisHelper.updateInventory(orderItem.getItemId(), (itemInventory - Integer.valueOf(orderItem.getItemQuantity()))));
+                        return null;
+                    });
 
-            RedisCache.getClient().get(orderItem.getItemId(), inventoryResult -> {
+        });
 
-                if (inventoryResult.succeeded()) {
+        CompletableFuture<Void>[] updateInventoryFutureArray = new CompletableFuture[updateInventoryFutureList.size()];
+        completableFutureArrayList.toArray(updateInventoryFutureArray);
+        CompletableFuture.allOf(updateInventoryFutureArray).thenAccept(unused -> {
+            Order order = new Order();
+            dtoHelper.createOrderDetails(order);
+            context.setOrder(order);
+            confirmAndUpdateItemsInventoryStepFuture.complete(context);
+        });
 
-                    Integer itemInventory = Integer.valueOf(inventoryResult.result());
-                    Integer itemQuantity = Integer.valueOf(orderItem.getItemQuantity());
-
-                    if (itemInventory == 0 || itemInventory < itemQuantity) {
-                        confirmAndUpdateItemsInventoryStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.ITEM_OUT_OF_STOCK.getAlertCode(), ServiceAlerts.ITEM_OUT_OF_STOCK.getAlertMessage(), null));
-                    } else {
-                        RedisCache.getClient().set(orderItem.getItemId(), String.valueOf(itemInventory - itemQuantity), voidAsyncResult -> {
-                            if (voidAsyncResult.succeeded()) {
-                                logger.info("item inventory updated in redis" + orderItem.getItemId());
-                                itemInventoryUpdateCompletableFuture.complete(null);
-                            } else {
-                                itemInventoryUpdateCompletableFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
-                            }
-                        });
-                    }
-                } else {
-                    itemInventoryUpdateCompletableFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
-                }
-
-            });
-
-        }
-
-        CompletableFuture<Void>[] completableFutures = new CompletableFuture[completableFutureArrayList.size()];
-        completableFutureArrayList.toArray(completableFutures);
-        CompletableFuture.allOf(completableFutures).thenAccept(unused -> confirmAndUpdateItemsInventoryStepFuture.complete(context));
 
         return confirmAndUpdateItemsInventoryStepFuture;
     }

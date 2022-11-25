@@ -14,7 +14,6 @@ public class RedisCache {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisCache.class);
 
-
     private static RedisClient redisClient = null;
 
     private static AtomicInteger clientStatus = new AtomicInteger(0); // 0 - not initialized, 1 - in-progress

@@ -1,21 +1,35 @@
 package org.shopping.company.services.orders.steps;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.shopping.common.components.constants.ServiceAlerts;
 import org.shopping.common.components.exception.ApplicationException;
-import org.shopping.common.components.mongo.MongoDB;
 import org.shopping.common.components.utils.JsonUtility;
+import org.shopping.company.services.orders.helpers.DTOHelper;
+import org.shopping.company.services.orders.helpers.DatabaseHelper;
+import org.shopping.company.services.orders.helpers.RedisHelper;
 import org.shopping.company.services.orders.request.CreateOrderRequest;
 import org.shopping.company.services.orders.workflow.Context;
+import org.shopping.company.services.orders.workflow.WorkflowStep;
 
 import java.util.concurrent.CompletableFuture;
 
 public class ValidateLoggedInUserStep implements WorkflowStep {
 
     private final Logger logger = LoggerFactory.getLogger(ValidateLoggedInUserStep.class);
+
+    DatabaseHelper databaseHelper;
+
+    DTOHelper dtoHelper;
+
+    RedisHelper redisHelper;
+
+    public ValidateLoggedInUserStep(DatabaseHelper databaseHelper, DTOHelper dtoHelper, RedisHelper redisHelper) {
+        this.databaseHelper = databaseHelper;
+        this.dtoHelper = dtoHelper;
+        this.redisHelper = redisHelper;
+    }
 
 
     @Override
@@ -32,14 +46,11 @@ public class ValidateLoggedInUserStep implements WorkflowStep {
             context.setCreateOrderRequest(createOrderRequest);
 
             String requestUserId = createOrderRequest.getUserId();
-            JsonObject filter = new JsonObject().put("userId", requestUserId);
 
-            MongoDB.getClient().find("APPLICATION_USERS", filter, result -> {
-                if (result.succeeded() && result.result().size() > 0) {
-                    logger.info("Userid in request successfully validated");
+            databaseHelper.validateLoggedInUser(requestUserId).thenAccept(isValidUser -> {
+                if (isValidUser) {
                     validateLoggedInUserStepFuture.complete(context);
                 } else {
-                    logger.info("Userid in request is invalid");
                     validateLoggedInUserStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INVALID_USER.getAlertCode(), ServiceAlerts.INVALID_USER.getAlertMessage(), null));
                 }
             });

@@ -17,6 +17,7 @@ public class ResponseHandler {
     public static <T> Handler<AsyncResult<T>> responseHandler(RoutingContext routingContext) {
 
         return ar -> {
+
             String trackingId = routingContext.request().getHeader(GatewayConstant.TRACKING_ID);
             if (ar.succeeded()) {
                 logger.info("Success Response Received From Workflow");
@@ -35,6 +36,7 @@ public class ResponseHandler {
                 logger.info("Failure Response Received From Workflow");
                 routingContext.fail(ar.cause());
             }
+
         };
     }
 }
