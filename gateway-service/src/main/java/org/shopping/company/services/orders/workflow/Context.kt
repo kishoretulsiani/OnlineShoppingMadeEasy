@@ -14,6 +14,8 @@ data class Context(
         var trackingId: String? = null,
         var createOrderRequest: CreateOrderRequest? = null,
         var createOrderResponse: CreateOrderResponse? = null,
+        var itemInventory: HashMap<String?, Int?>? = null,
+        var isOrderSavedInDB: Boolean? = null,
         var order: Order? = null
 
 

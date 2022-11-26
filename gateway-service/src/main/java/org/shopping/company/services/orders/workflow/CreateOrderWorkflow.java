@@ -9,9 +9,11 @@ import org.shopping.common.components.constants.ServiceAlerts;
 import org.shopping.company.services.orders.helpers.DTOHelper;
 import org.shopping.company.services.orders.helpers.DatabaseHelper;
 import org.shopping.company.services.orders.helpers.RedisHelper;
+import org.shopping.company.services.orders.steps.ApplyOffersStep;
 import org.shopping.company.services.orders.steps.CalculateOrderAmountsStep;
-import org.shopping.company.services.orders.steps.ConfirmAndUpdateItemsInventoryStep;
+import org.shopping.company.services.orders.steps.ConfirmInventoryStep;
 import org.shopping.company.services.orders.steps.CreateOrderStep;
+import org.shopping.company.services.orders.steps.UpdateItemsInventoryStep;
 import org.shopping.company.services.orders.steps.ValidateCreateOrderRequestStep;
 import org.shopping.company.services.orders.steps.ValidateLoggedInUserStep;
 
@@ -46,13 +48,16 @@ public class CreateOrderWorkflow {
         // validate create order request
         // update inventory of items in db and create order entry
         // calculate other order details tax and total amount and create order details in mongo
+        // apply offers applicable
         // process payment
         // create order response
 
         new ValidateLoggedInUserStep(databaseHelper, dtoHelper, redisHelper).execute(context)
                 .thenCompose(new ValidateCreateOrderRequestStep(databaseHelper, dtoHelper, redisHelper)::execute)
-                .thenCompose(new ConfirmAndUpdateItemsInventoryStep(databaseHelper, dtoHelper, redisHelper)::execute)
+                .thenCompose(new ConfirmInventoryStep(databaseHelper, dtoHelper, redisHelper)::execute)
+                .thenCompose(new UpdateItemsInventoryStep(databaseHelper, dtoHelper, redisHelper)::execute)
                 .thenCompose(new CalculateOrderAmountsStep(databaseHelper, dtoHelper, redisHelper)::execute)
+                .thenCompose(new ApplyOffersStep(databaseHelper, dtoHelper, redisHelper)::execute)
                 .thenCompose(new CreateOrderStep(databaseHelper, dtoHelper, redisHelper)::execute)
                 .thenAccept(context1 -> {
 

@@ -93,6 +93,28 @@ public class InsertDummyDataMongoDB {
             }
         });
 
+        Promise<Void> offersCollectionPromise = Promise.promise();
+        MongoDB.getClient().createCollection(DBCollections.OFFERS.name(), res -> {
+            if (res.succeeded()) {
+                logger.info("Collection got created successfully");
+                offersCollectionPromise.complete();
+            } else {
+                if (res.cause() instanceof MongoCommandException) {
+                    MongoCommandException exception = (MongoCommandException) res.cause();
+                    if (exception.getCode() == 48) {
+                        //ignore as collection already exists and no need to create a new one.
+                        logger.info("OFFERS Collection already exists");
+
+                        offersCollectionPromise.complete();
+                    }
+                } else {
+                    res.cause().printStackTrace();
+                    logger.info("OFFERS Collection Creation Failed");
+                    offersCollectionPromise.fail("OFFERS Collection Creation Failed");
+                }
+            }
+        });
+
 
         Promise<Void> usersInsertPromise = Promise.promise();
         JsonObject user1 = new JsonObject()
@@ -174,6 +196,44 @@ public class InsertDummyDataMongoDB {
             } else {
                 itemResults.cause().printStackTrace();
                 itemsInsertPromise.fail("APPLICATION_USERS Collection Initialization Failed");
+            }
+        });
+
+
+        Promise<Void> offersInsertPromise = Promise.promise();
+        JsonObject offer1 = new JsonObject()
+                .put("offerId", "offerId1")
+                .put("offerType", "BUY_ONE_GET_ONE_FREE")
+                .put("applicableItems", Arrays.asList("item1"))
+                .put("docType", "OFFER");
+
+        JsonObject offer2 = new JsonObject()
+                .put("offerId", "offerId2")
+                .put("offerType", "3_FOR_THE_PRICE_OF_2_ON_ORANGES")
+                .put("applicableItems", Arrays.asList("item2"))
+                .put("docType", "OFFER");
+
+        JsonObject offerFilter1 = new JsonObject()
+                .put("offerId", "offerId1");
+
+        JsonObject offerFilter2 = new JsonObject()
+                .put("offerId", "offerId2");
+
+
+        BulkOperation bulkReplaceOffer1 = BulkOperation.createReplace(offerFilter1, offer1).setUpsert(true);
+        BulkOperation bulkReplaceOffer2 = BulkOperation.createReplace(offerFilter2, offer2).setUpsert(true);
+
+
+        List<BulkOperation> offerOperations = Arrays.asList(
+                bulkReplaceOffer1, bulkReplaceOffer2);
+
+        MongoDB.getClient().bulkWrite(DBCollections.OFFERS.name(), offerOperations, itemResults -> {
+            if (itemResults.succeeded()) {
+                logger.info("offers replaced !");
+                offersInsertPromise.complete();
+            } else {
+                itemResults.cause().printStackTrace();
+                offersInsertPromise.fail("OFFERS Collection Initialization Failed");
             }
         });
 

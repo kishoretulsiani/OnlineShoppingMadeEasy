@@ -10,11 +10,13 @@ import org.shopping.common.components.mongo.MongoDB;
 import org.shopping.common.components.utils.JsonUtility;
 import org.shopping.company.services.orders.workflow.Context;
 import org.shopping.datamodel.beans.DBCollections;
+import org.shopping.datamodel.beans.DocumentType;
 import org.shopping.datamodel.beans.Order;
 import org.shopping.datamodel.beans.OrderItem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 public class DatabaseHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseHelper.class);
+
+    private static HashMap<String, String> offersCache = null;
 
 
     public CompletableFuture<Boolean> orderCreateUpsert(Order order, Context context) {
@@ -45,7 +49,6 @@ public class DatabaseHelper {
                 orderUpdateFuture.complete(false);
             }
         });
-
 
         return orderUpdateFuture;
 
@@ -113,5 +116,36 @@ public class DatabaseHelper {
 
     }
 
+    public CompletableFuture<HashMap<String, String>> getOffersCache() {
+
+        CompletableFuture<HashMap<String, String>> getOffersFuture = new CompletableFuture();
+
+        if (offersCache != null) {
+            getOffersFuture.complete(offersCache);
+        } else {
+            offersCache = new HashMap<>();
+            JsonObject queryParam = new JsonObject()
+                    .put("docType", DocumentType.OFFER.name());
+
+            MongoDB.getClient().find(DBCollections.OFFERS.name(), queryParam, result -> {
+                if (result.succeeded()) {
+                    List<JsonObject> offersList = result.result();
+                    offersList.forEach(offer -> {
+                        String offerType = offer.getString("offerType");
+                        List<String> applicableItemsList = offer.getJsonArray("applicableItems").getList();
+                        for (String itemId : applicableItemsList) {
+                            offersCache.put(itemId, offerType);
+                        }
+                    });
+                    getOffersFuture.complete(offersCache);
+                } else {
+                    getOffersFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
+                }
+            });
+        }
+
+        return getOffersFuture;
+
+    }
 
 }
