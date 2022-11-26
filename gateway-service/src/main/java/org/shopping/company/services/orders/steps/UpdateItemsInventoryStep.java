@@ -2,6 +2,8 @@ package org.shopping.company.services.orders.steps;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.shopping.common.components.constants.ServiceAlerts;
+import org.shopping.common.components.exception.ApplicationException;
 import org.shopping.company.services.orders.helpers.DTOHelper;
 import org.shopping.company.services.orders.helpers.DatabaseHelper;
 import org.shopping.company.services.orders.helpers.RedisHelper;
@@ -14,9 +16,9 @@ import org.shopping.datamodel.beans.OrderItem;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
-public class ConfirmAndUpdateItemsInventoryStep implements WorkflowStep {
+public class UpdateItemsInventoryStep implements WorkflowStep {
 
-    private final Logger logger = LoggerFactory.getLogger(ConfirmAndUpdateItemsInventoryStep.class);
+    private final Logger logger = LoggerFactory.getLogger(UpdateItemsInventoryStep.class);
 
     DatabaseHelper databaseHelper;
 
@@ -24,7 +26,7 @@ public class ConfirmAndUpdateItemsInventoryStep implements WorkflowStep {
 
     RedisHelper redisHelper;
 
-    public ConfirmAndUpdateItemsInventoryStep(DatabaseHelper databaseHelper, DTOHelper dtoHelper, RedisHelper redisHelper) {
+    public UpdateItemsInventoryStep(DatabaseHelper databaseHelper, DTOHelper dtoHelper, RedisHelper redisHelper) {
         this.databaseHelper = databaseHelper;
         this.dtoHelper = dtoHelper;
         this.redisHelper = redisHelper;
@@ -40,26 +42,31 @@ public class ConfirmAndUpdateItemsInventoryStep implements WorkflowStep {
 
         ArrayList<OrderItem> orderItemArrayList = createOrderRequest.getItemDetails();
 
-        ArrayList<CompletableFuture<Void>> completableFutureArrayList = new ArrayList<>();
+        ArrayList<CompletableFuture<Boolean>> itemInventoryFutureList = new ArrayList<>();
 
-        ArrayList<CompletableFuture<Boolean>> updateInventoryFutureList = new ArrayList<>();
 
         orderItemArrayList.forEach(orderItem -> {
-            redisHelper.getItemInventoryIfExists(orderItem.getItemId(), orderItem.getItemQuantity())
-                    .thenCompose(itemInventory -> {
-                        updateInventoryFutureList.add(redisHelper.updateInventory(orderItem.getItemId(), (itemInventory - Integer.valueOf(orderItem.getItemQuantity()))));
-                        return null;
-                    });
-
+            itemInventoryFutureList.add(
+                    redisHelper.updateInventory(orderItem.getItemId(), (context.getItemInventory().get(orderItem.getItemId()) - Integer.valueOf(orderItem.getItemQuantity()))
+                    ));
         });
 
-        CompletableFuture<Void>[] updateInventoryFutureArray = new CompletableFuture[updateInventoryFutureList.size()];
-        updateInventoryFutureList.toArray(updateInventoryFutureArray);
-        CompletableFuture.allOf(updateInventoryFutureArray).thenAccept(unused -> {
+
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(itemInventoryFutureList.toArray(new CompletableFuture[itemInventoryFutureList.size()]));
+
+        allFutures.thenApply(unused -> {
+
             Order order = new Order();
             dtoHelper.createOrderDetails(order);
             context.setOrder(order);
+
             confirmAndUpdateItemsInventoryStepFuture.complete(context);
+
+            return null;
+        }).exceptionally(throwable -> {
+            confirmAndUpdateItemsInventoryStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
+
+            return null;
         });
 
 

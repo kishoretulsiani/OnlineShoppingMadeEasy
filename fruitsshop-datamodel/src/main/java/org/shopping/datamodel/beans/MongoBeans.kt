@@ -12,16 +12,27 @@ class ApplicationUser {
     var firstName: String? = null
     var lastName: String? = null
     var address: Address? = null
+    var ordersList: List<String>? = null
     var docType: DocumentType = DocumentType.APPLICATION_USER
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class Offers {
+    var offerId: String? = null
+    var offerType: String? = null
+    var applicableItems: List<String>? = null
+    var docType: DocumentType = DocumentType.OFFER
+
 }
 
 
 enum class DBCollections {
-    ORDERS, APPLICATION_USERS, ORDER_ITEMS
+    ORDERS, APPLICATION_USERS, ORDER_ITEMS, OFFERS
 }
 
 enum class DocumentType {
-    APPLICATION_USER, ORDER, ORDER_ITEM
+    APPLICATION_USER, ORDER, ORDER_ITEM, OFFER
 }
 
 enum class ORDER_STATUS {
@@ -70,6 +81,7 @@ class PaymentDetails {
 class OrderAmountSummary {
     var orderSubTotalAmount: String? = null
     var shippingAmount: String? = null
+    var totalDiscount: String? = null
     var totalTax: String? = null
     var grandTotal: String? = null
 }
@@ -82,6 +94,7 @@ class OrderItem {
     var itemDescription: String? = null
     var itemQuantity: String? = null
     var itemPrice: Double? = null
+    var itemDiscount: Double? = null
     var docType: DocumentType = DocumentType.ORDER_ITEM
 }
 

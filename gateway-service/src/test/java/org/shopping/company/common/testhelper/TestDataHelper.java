@@ -3,6 +3,7 @@ package org.shopping.company.common.testhelper;
 
 import io.vertx.core.json.JsonObject;
 import org.shopping.datamodel.beans.DocumentType;
+import org.shopping.datamodel.beans.OrderAmountSummary;
 import org.shopping.datamodel.beans.OrderItem;
 
 import java.io.File;
@@ -63,6 +64,16 @@ public class TestDataHelper {
 
 
         return orderItemList;
+    }
+
+    public static OrderAmountSummary getOrderAmountSummaryWithoutDiscounts() {
+        OrderAmountSummary orderAmountSummary = new OrderAmountSummary();
+        orderAmountSummary.setOrderSubTotalAmount("1.95");
+        orderAmountSummary.setShippingAmount("10.0");
+        orderAmountSummary.setGrandTotal("12.24");
+        orderAmountSummary.setTotalDiscount(null);
+        orderAmountSummary.setTotalTax("0.29");
+        return orderAmountSummary;
     }
 
 

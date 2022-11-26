@@ -34,7 +34,6 @@ public class CalculateOrderAmountsStep implements WorkflowStep {
     }
 
 
-
     public static void createOrderAmountsSummary(List<OrderItem> orderItemList, ArrayList<OrderItem> requestOrderItemArrayList, Context context) {
         OrderAmountSummary orderAmountSummary = new OrderAmountSummary();
 
@@ -53,9 +52,12 @@ public class CalculateOrderAmountsStep implements WorkflowStep {
         }
 
         totalTax = 0.15 * orderSubTotalAmount;
+        totalTax = Math.round(totalTax * 100.0) / 100.0;
 
 
         grandTotal = orderSubTotalAmount + totalTax + shippingAmount;
+        grandTotal = Math.round(grandTotal * 100.0) / 100.0;
+
         orderAmountSummary.setOrderSubTotalAmount(String.valueOf(orderSubTotalAmount));
         orderAmountSummary.setShippingAmount(String.valueOf(shippingAmount));
         orderAmountSummary.setTotalTax(String.valueOf(totalTax));
@@ -84,7 +86,15 @@ public class CalculateOrderAmountsStep implements WorkflowStep {
 
             context.getOrder().setOrderItems(orderItems);
 
-            databaseHelper.orderCreateUpsert(context.getOrder(), context).thenAccept(aBoolean -> calculateOrderAmountsStepFuture.complete(context));
+            databaseHelper.orderCreateUpsert(context.getOrder(), context).thenAccept(aBoolean -> {
+                context.setOrderSavedInDB(Boolean.TRUE);
+                calculateOrderAmountsStepFuture.complete(context);
+            }).exceptionally(throwable -> {
+                // this is very crucial stage, we cannot afford not to save order at this point..
+                // we should implement all mechanisms to retry or reprocess at later stage. as we have already
+                // reduced the inventory at this point.
+                return null;
+            });
 
         });
 

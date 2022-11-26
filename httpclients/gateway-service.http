@@ -9,11 +9,11 @@ Content-Type: application/json
   "itemDetails": [
     {
       "itemId": "item1",
-      "itemQuantity": "1"
+      "itemQuantity": "2"
     },
     {
       "itemId": "item2",
-      "itemQuantity": "1"
+      "itemQuantity": "3"
     }
   ],
   "paymentDetails": {

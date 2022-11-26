@@ -9,6 +9,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.serviceproxy.ServiceException;
 import org.shopping.common.components.constants.ResponseStatus;
 import org.shopping.common.components.constants.ResponseStatusMapper;
+import org.shopping.common.components.constants.ServiceAlerts;
 import org.shopping.common.components.exception.ApplicationException;
 import org.shopping.company.gateway.constants.GatewayConstant;
 
@@ -42,7 +43,7 @@ public class ExceptionHandler implements Handler<RoutingContext> {
             responseStatus = responseStatusMapper.mapErrorCode(exception.getResponseCode());
         } else {
             logger.error("Some Exception occurred  " + throwable.getMessage());
-            responseStatus = responseStatusMapper.mapErrorCode(1005);
+            responseStatus = responseStatusMapper.mapErrorCode(ServiceAlerts.INTERNAL_ERROR.getAlertCode());
         }
 
         httpStatusCode = responseStatus.getHttpStatus();
