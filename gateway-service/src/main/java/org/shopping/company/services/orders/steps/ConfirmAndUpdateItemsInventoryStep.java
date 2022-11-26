@@ -54,7 +54,7 @@ public class ConfirmAndUpdateItemsInventoryStep implements WorkflowStep {
         });
 
         CompletableFuture<Void>[] updateInventoryFutureArray = new CompletableFuture[updateInventoryFutureList.size()];
-        completableFutureArrayList.toArray(updateInventoryFutureArray);
+        updateInventoryFutureList.toArray(updateInventoryFutureArray);
         CompletableFuture.allOf(updateInventoryFutureArray).thenAccept(unused -> {
             Order order = new Order();
             dtoHelper.createOrderDetails(order);

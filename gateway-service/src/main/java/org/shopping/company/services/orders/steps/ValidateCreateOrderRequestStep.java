@@ -42,7 +42,7 @@ public class ValidateCreateOrderRequestStep implements WorkflowStep {
         String strRequest = context.getRequestObject().toString();
         CreateOrderRequest createOrderRequest = null;
 
-        if (StringUtils.isBlank(strRequest)) {
+        if (StringUtils.isBlank(strRequest) || strRequest.equals("{}")) {
             errorArgs.add("missing_request_body");
         } else {
             createOrderRequest = JsonUtility.getInstance().getObject(strRequest, CreateOrderRequest.class);

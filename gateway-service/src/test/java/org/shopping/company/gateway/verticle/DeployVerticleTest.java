@@ -15,12 +15,16 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.TimeoutHandler;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shopping.common.components.constants.ResponseStatusMapper;
@@ -34,6 +38,7 @@ import org.shopping.company.gateway.handler.ResponseHandler;
 import org.shopping.company.services.orders.OrdersService;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RunWith(VertxUnitRunner.class)
 public class DeployVerticleTest {
@@ -48,7 +53,11 @@ public class DeployVerticleTest {
 
     private static OrdersService ordersService = null;
 
-    private HttpClient httpClient;
+    private static HttpClient client;
+
+    @Rule
+    public RunTestOnContext rule = new RunTestOnContext();
+
 
     private static void handleOrdersRequest(RoutingContext routingContext) {
         JsonObject incomingRequest = routingContext.getBodyAsJson();
@@ -64,9 +73,11 @@ public class DeployVerticleTest {
 
         Async async = context.async();
 
-        Vertx vertx = Vertx.vertx();
+        Vertx vertx = rule.vertx();
 
         Map<String, String> env = System.getenv();
+
+        client = rule.vertx().createHttpClient();
 
         // initializing MongoDB
         Future mongoFuture = MongoDB.initialize(vertx).compose(unused -> InsertDummyDataMongoDB.execute(vertx));
@@ -107,12 +118,51 @@ public class DeployVerticleTest {
     }
 
     @Test
-    public void testServerUserRegister(TestContext context) {
+    // validations in this can be simple but we can go exhaustive like
+    // validate everything in database also got inserted correctly
+    // once we got CONFIRMED order in response
+    public void create_order_success_test(TestContext context) {
         JsonObject createOrderRequest = TestDataHelper.readCreateOrderRequestFromFile("create-order-success-request.json");
         // Get an async object to control the completion of the test
         Async async = context.async();
 
-        HttpClient client = Vertx.vertx().createHttpClient();
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions.setURI("/shopping/company/orders");
+        requestOptions.setHost("localhost");
+        requestOptions.setPort(8080);
+        requestOptions.setSsl(false);
+
+
+        HttpClientRequest request = client.request(HttpMethod.POST, requestOptions, response -> {
+            // confirming http status in case of successful scenario
+            Assert.assertEquals(200, response.statusCode());
+            response.bodyHandler(buffer -> {
+                logger.info(buffer.toString());
+                JsonObject jsonObject = buffer.toJsonObject();
+                // confirming orderId got generated
+                Assert.assertNull(jsonObject.getString("orderId"));
+            });
+            async.complete();
+            logger.info("http response code " + response.statusCode());
+        });
+
+        String body = Json.encode(createOrderRequest);
+        Buffer writeBuffer = Buffer.buffer(body);
+        request.headers().add("Content-Length", String.valueOf(writeBuffer.length()));
+        request.putHeader("x-tracking-id", UUID.randomUUID().toString());
+        request.putHeader("Content-Type", "application/json");
+        request.write(body);
+        request.end();
+    }
+
+    @Test
+    @Ignore
+    // we can write various test cases like this as per api swagger
+    public void mandatory_data_missing_test(TestContext context) {
+        JsonObject createOrderRequest = TestDataHelper.readCreateOrderRequestFromFile("create-order-success-request.json");
+        createOrderRequest.remove("shippingAddressId");
+        // Get an async object to control the completion of the test
+        Async async = context.async();
 
         RequestOptions requestOptions = new RequestOptions();
         requestOptions.setURI("/shopping/company/orders");
@@ -121,21 +171,64 @@ public class DeployVerticleTest {
         requestOptions.setSsl(false);
 
         HttpClientRequest request = client.request(HttpMethod.POST, requestOptions, response -> {
+            // confirming http status in case of successful scenario
+            logger.info("http response code = " + response.statusCode());
+            Assert.assertEquals(400, response.statusCode());
+
             response.bodyHandler(buffer -> {
                 logger.info(buffer.toString());
+                // confirming orderId got generated
+                logger.info(buffer.toString());
             });
-            logger.info("response code" + response.statusCode());
             async.complete();
+
         });
 
         String body = Json.encode(createOrderRequest);
         Buffer writeBuffer = Buffer.buffer(body);
         request.headers().add("Content-Length", String.valueOf(writeBuffer.length()));
-        request.putHeader("x-tracking-id", "7552916d-a1a4-41ed-9fc2-5c5e706015cf");
+        request.putHeader("x-tracking-id", UUID.randomUUID().toString());
+        request.putHeader("Content-Type", "application/json");
+        request.write(body);
+        request.end();
+
+    }
+
+
+    @Test
+    @Ignore
+    // we can write various test cases like this as per api swagger
+    public void unauthorized_user_test(TestContext context) {
+        JsonObject createOrderRequest = TestDataHelper.readCreateOrderRequestFromFile("create-order-success-request.json");
+        createOrderRequest.remove("userId");
+        // Get an async object to control the completion of the test
+        Async async = context.async();
+
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions.setURI("/shopping/company/orders");
+        requestOptions.setHost("localhost");
+        requestOptions.setPort(8080);
+        requestOptions.setSsl(false);
+
+        HttpClientRequest request = client.request(HttpMethod.POST, requestOptions, response -> {
+            // confirming http status in case of successful scenario
+            logger.info("http response code = " + response.statusCode());
+            Assert.assertEquals(401, response.statusCode());
+            response.bodyHandler(buffer -> {
+                logger.info(buffer.toString());
+                // confirming orderId got generated
+                logger.info(buffer.toString());
+                async.complete();
+            });
+        });
+
+        String body = Json.encode(createOrderRequest);
+        Buffer writeBuffer = Buffer.buffer(body);
+        request.headers().add("Content-Length", String.valueOf(writeBuffer.length()));
+        request.putHeader("x-tracking-id", UUID.randomUUID().toString());
         request.putHeader("Content-Type", "application/json");
         request.write(body);
         request.end();
     }
-
 
 }

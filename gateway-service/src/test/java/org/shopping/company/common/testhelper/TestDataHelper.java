@@ -2,7 +2,8 @@ package org.shopping.company.common.testhelper;
 
 
 import io.vertx.core.json.JsonObject;
-import org.shopping.company.services.orders.workflow.Context;
+import org.shopping.datamodel.beans.DocumentType;
+import org.shopping.datamodel.beans.OrderItem;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +11,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestDataHelper {
 
@@ -37,22 +40,29 @@ public class TestDataHelper {
         return new JsonObject(fileContents);
     }
 
-    public static Context buildContext() {
-        Context context = new Context();
-        URL resource = TestDataHelper.class.getClassLoader().getResource("create-order-success-request.json");
-        if (resource == null) {
-            throw new IllegalArgumentException("file not found! ");
-        }
-        File file = null;
-        try {
-            file = new File(resource.toURI());
-            String lines = Files.readString(file.toPath(), StandardCharsets.UTF_8);
-            JsonObject requestBody = new JsonObject(lines);
-            context.setRequestObject(requestBody);
-        } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
-        }
-        return context;
+
+    public static List<OrderItem> getDBOrderItemList() {
+        List<OrderItem> orderItemList = new ArrayList<>();
+        OrderItem orderItem1 = new OrderItem();
+        orderItem1.setItemId("item1");
+        orderItem1.setItemName("Apples");
+        orderItem1.setItemDescription("Gala Apples");
+        orderItem1.setItemPrice(0.60);
+        orderItem1.setItemQuantity("0");
+        orderItem1.setDocType(DocumentType.ORDER_ITEM);
+        orderItemList.add(orderItem1);
+
+        OrderItem orderItem2 = new OrderItem();
+        orderItem2.setItemId("item2");
+        orderItem2.setItemName("Oranges");
+        orderItem2.setItemDescription("Navel Oranges");
+        orderItem2.setItemPrice(0.25);
+        orderItem2.setItemQuantity("0");
+        orderItem2.setDocType(DocumentType.ORDER_ITEM);
+        orderItemList.add(orderItem2);
+
+
+        return orderItemList;
     }
 
 
