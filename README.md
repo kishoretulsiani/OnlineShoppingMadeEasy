@@ -40,6 +40,7 @@ db.createUser({
 Please use following prefixes to your git commits.
 
 * feat – a new feature is introduced with the changes
+* test - test cases are added to the modules
 * fix – a bug fix has occurred
 * refactor – refactored code that neither fixes a bug nor adds a feature
 * docs – updates to documentation such as a the README or other markdown files

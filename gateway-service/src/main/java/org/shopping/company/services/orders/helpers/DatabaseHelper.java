@@ -8,7 +8,6 @@ import org.shopping.common.components.constants.ServiceAlerts;
 import org.shopping.common.components.exception.ApplicationException;
 import org.shopping.common.components.mongo.MongoDB;
 import org.shopping.common.components.utils.JsonUtility;
-import org.shopping.company.services.orders.steps.CalculateOrderAmountsStep;
 import org.shopping.company.services.orders.workflow.Context;
 import org.shopping.datamodel.beans.DBCollections;
 import org.shopping.datamodel.beans.Order;
@@ -73,6 +72,18 @@ public class DatabaseHelper {
 
     }
 
+    public static OrderItem objectMapper(JsonObject jsonObject) {
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setItemId(jsonObject.getString("itemId"));
+        orderItem.setItemQuantity(jsonObject.getString("itemQuantity"));
+        orderItem.setItemName(jsonObject.getString("itemName"));
+        orderItem.setItemDescription(jsonObject.getString("itemDescription"));
+        orderItem.setItemPrice(jsonObject.getDouble("itemPrice"));
+
+        return orderItem;
+    }
+
     public CompletableFuture<List<OrderItem>> getOrderItems(List<OrderItem> requestOrderItems) {
 
         CompletableFuture<List<OrderItem>> getOrderItemsFuture = new CompletableFuture();
@@ -89,7 +100,7 @@ public class DatabaseHelper {
             if (result.succeeded()) {
                 List<JsonObject> itemArrayList = result.result();
 
-                List<OrderItem> orderItemList = itemArrayList.stream().map(CalculateOrderAmountsStep::objectMapper).collect(Collectors.toList());
+                List<OrderItem> orderItemList = itemArrayList.stream().map(DatabaseHelper::objectMapper).collect(Collectors.toList());
 
                 getOrderItemsFuture.complete(orderItemList);
 

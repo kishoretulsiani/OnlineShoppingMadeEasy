@@ -1,6 +1,5 @@
 package org.shopping.company.services.orders.steps;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.shopping.company.services.orders.helpers.DTOHelper;
@@ -34,17 +33,7 @@ public class CalculateOrderAmountsStep implements WorkflowStep {
         this.redisHelper = redisHelper;
     }
 
-    public static OrderItem objectMapper(JsonObject jsonObject) {
 
-        OrderItem orderItem = new OrderItem();
-        orderItem.setItemId(jsonObject.getString("itemId"));
-        orderItem.setItemQuantity(jsonObject.getString("itemQuantity"));
-        orderItem.setItemName(jsonObject.getString("itemName"));
-        orderItem.setItemDescription(jsonObject.getString("itemDescription"));
-        orderItem.setItemPrice(jsonObject.getInteger("itemPrice"));
-
-        return orderItem;
-    }
 
     public static void createOrderAmountsSummary(List<OrderItem> orderItemList, ArrayList<OrderItem> requestOrderItemArrayList, Context context) {
         OrderAmountSummary orderAmountSummary = new OrderAmountSummary();

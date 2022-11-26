@@ -81,7 +81,7 @@ class OrderItem {
     var itemName: String? = null
     var itemDescription: String? = null
     var itemQuantity: String? = null
-    var itemPrice: Integer? = null
+    var itemPrice: Double? = null
     var docType: DocumentType = DocumentType.ORDER_ITEM
 }
 

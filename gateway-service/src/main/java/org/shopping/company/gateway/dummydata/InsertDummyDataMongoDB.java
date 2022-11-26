@@ -141,7 +141,7 @@ public class InsertDummyDataMongoDB {
                 .put("itemId", "item1")
                 .put("itemName", "Apples")
                 .put("itemDescription", "Gala Apples")
-                .put("itemPrice", 2)
+                .put("itemPrice", 0.60)
                 .put("itemQuantity", "0")
                 .put("docType", "ORDER_ITEM");
 
@@ -149,7 +149,7 @@ public class InsertDummyDataMongoDB {
                 .put("itemId", "item2")
                 .put("itemName", "Oranges")
                 .put("itemDescription", "Naval Oranges")
-                .put("itemPrice", 2)
+                .put("itemPrice", 0.25)
                 .put("itemQuantity", "0")
                 .put("docType", "ORDER_ITEM");
 

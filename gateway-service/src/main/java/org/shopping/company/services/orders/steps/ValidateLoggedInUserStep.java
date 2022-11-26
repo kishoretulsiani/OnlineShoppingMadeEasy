@@ -40,7 +40,7 @@ public class ValidateLoggedInUserStep implements WorkflowStep {
 
         String strRequest = context.getRequestObject().toString();
 
-        if (StringUtils.isNotBlank(strRequest)) {
+        if (StringUtils.isNotBlank(strRequest) && !strRequest.equals("{}")) {
             final CreateOrderRequest createOrderRequest = JsonUtility.getInstance().getObject(strRequest, CreateOrderRequest.class);
             logger.info("Request got converted to object");
             context.setCreateOrderRequest(createOrderRequest);
