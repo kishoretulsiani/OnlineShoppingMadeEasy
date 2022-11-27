@@ -1,8 +1,8 @@
 post:
-  summary: Create Offer
-  description: Submit Offer Confirmation.
+  summary: Retrieve Orders
+  description: Retrieve single, multiple or all Orders for a user.
   tags:
-    - Offers
+    - Order
   consumes:
     - "application/json"
   produces:
@@ -24,7 +24,7 @@ post:
     - name: payload
       in: body
       schema:
-        $ref: ../definitions/offer/create_offer_request.yml
+        $ref: ../definitions/order/retrieve_orders_request.yml
   responses:
     200:
       description: "successful operation"
@@ -36,7 +36,7 @@ post:
           maxLength: 36
           type: string
       schema:
-        $ref: ../definitions/offer/create_offer_response.yml
+        $ref: ../definitions/order/retrieve_orders_response.yml
     400:
       description: "Bad Request"
       headers:

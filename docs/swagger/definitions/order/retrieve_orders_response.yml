@@ -1,0 +1,95 @@
+type: object
+description: Account update event.
+required:
+  - status_code
+  - status_code_type
+  - events
+properties:
+  orders:
+    type: array
+    items:
+      type: object
+      properties:
+        orderId:
+          type: string
+          example: dcdb28bc-b478-4eee-904c-8a29c84e9b6a
+        orderDetails:
+          type: object
+          properties:
+            orderDate:
+              type: string
+              example: 2022-11-26T19:33:20.457794
+            orderStatus:
+              type: string
+              example: CONFIRMED
+        paymentDetails:
+          type: object
+          properties:
+            paymentId:
+              type: string
+              example: 7e5621c3-e8fc-4349-956d-6c08be37241f
+            paymentMethod:
+              type: string
+              example: CARD
+            lastDigits:
+              type: string
+              example: 2244
+        orderAmountSummary:
+          type: object
+          properties:
+            orderSubTotalAmount:
+              type: string
+              example: 1.1
+            shippingAmount:
+              type: string
+              example: 10.0
+            totalDiscount:
+              type: string
+              example: 0.85
+            totalTax:
+              type: string
+              example: 0.17
+            grandTotal:
+              type: string
+              example: 11.27
+        orderItems:
+          type: array
+          items:
+            type: object
+            properties:
+              itemId:
+                type: string
+                example: item1
+              itemName:
+                type: string
+                example: Apples
+              itemDescription:
+                type: string
+                example: Gala Apples
+              itemQuantity:
+                type: string
+                example: 2
+              itemPrice:
+                type: number
+                example: 0.6
+              itemDiscount:
+                type: number
+                example: 0.6
+              docType:
+                type: string
+                example: ORDER_ITEM
+        shippingSummary:
+          type: array
+          items:
+            type: object
+            properties:
+              itemId:
+                type: string
+                example: item1
+              shippingDate:
+                type: string
+                example: 2022-11-26T19:33:20.494809
+        docType:
+          type: string
+          example: ORDER
+

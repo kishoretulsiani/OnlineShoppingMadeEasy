@@ -5,9 +5,86 @@ required:
   - status_code_type
   - events
 properties:
-  status_code:
+  orderId:
     type: string
-    enum: [SUCCESS]
-  status_code_type:
+    example: 69125d7d-5f57-4523-828f-009182e7018f
+  orderDetails:
+    type: object
+    properties:
+      orderDate:
+        type: string
+        example: 2022-11-26T19:28:54.212764
+      orderStatus:
+        type: string
+        example: CONFIRMED
+  paymentDetails:
+    type: object
+    properties:
+      paymentId:
+        type: string
+        example: 1c389004-ec69-4c22-be61-507346bdefa7
+      paymentMethod:
+        type: string
+        example: CARD
+      lastDigits:
+        type: string
+        example: 2244
+  orderAmountSummary:
+    type: object
+    properties:
+      orderSubTotalAmount:
+        type: string
+        example: 1.1
+      shippingAmount:
+        type: string
+        example: 10.0
+      totalDiscount:
+        type: string
+        example: 0.85
+      totalTax:
+        type: string
+        example: 0.17
+      grandTotal:
+        type: string
+        example: 11.27
+  orderItems:
+    type: array
+    items:
+      type: object
+      properties:
+        itemId:
+          type: string
+          example: item1
+        itemName:
+          type: string
+          example: Apples
+        itemDescription:
+          type: string
+          example: Gala Apples
+        itemQuantity:
+          type: string
+          example: 2
+        itemPrice:
+          type: number
+          example: 0.6
+        itemDiscount:
+          type: number
+          example: 0.6
+        docType:
+          type: string
+          example: ORDER_ITEM
+  shippingSummary:
+    type: array
+    items:
+      type: object
+      properties:
+        itemId:
+          type: string
+          example: item1
+        shippingDate:
+          type: string
+          example: 2022-11-26T19:28:54.253352
+  docType:
     type: string
-    enum: [SUCCESS]
+    example: ORDER
+
