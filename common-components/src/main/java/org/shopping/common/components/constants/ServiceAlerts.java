@@ -7,7 +7,9 @@ public enum ServiceAlerts {
     INVALID_USER(4000, "DECLINED"),
     MANDATORY_DATA_MISSING(1005, "Mandatory Data Missing from "),
     INTERNAL_ERROR(1002, "Internal API error occurred in "),
-    ITEM_OUT_OF_STOCK(1003, "Item is out of stock ");
+    ITEM_OUT_OF_STOCK(1003, "Item is out of stock "),
+    NO_ORDERS_FOUND(1006, "No Orders found ");
+
 
     int code;
     String message;

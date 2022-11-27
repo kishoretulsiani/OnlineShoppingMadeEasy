@@ -33,4 +33,6 @@ public interface OrdersService {
 
     void createOrder(JsonObject request, Handler<AsyncResult<JsonObject>> asyncResultHandler);
 
+    void retrieveOrders(JsonObject request, Handler<AsyncResult<JsonObject>> asyncResultHandler);
+
 }

@@ -47,12 +47,16 @@ public class ValidateLoggedInUserStep implements WorkflowStep {
 
             String requestUserId = createOrderRequest.getUserId();
 
-            databaseHelper.validateLoggedInUser(requestUserId).thenAccept(isValidUser -> {
-                if (isValidUser) {
+            databaseHelper.getApplicationUser(requestUserId).thenAccept(user -> {
+                if (user != null) {
+                    context.setLoggedInUser(user);
                     validateLoggedInUserStepFuture.complete(context);
                 } else {
                     validateLoggedInUserStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INVALID_USER.getAlertCode(), ServiceAlerts.INVALID_USER.getAlertMessage(), null));
                 }
+            }).exceptionally(throwable -> {
+                validateLoggedInUserStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INVALID_USER.getAlertCode(), ServiceAlerts.INVALID_USER.getAlertMessage(), null));
+                return null;
             });
 
         } else {

@@ -5,7 +5,7 @@ x-tracking-id: {{$uuid}}
 Content-Type: application/json
 
 {
-  "userId": "userId2",
+  "userId": "userId3",
   "itemDetails": [
     {
       "itemId": "item1",
@@ -24,3 +24,23 @@ Content-Type: application/json
 }
 
 ###
+
+POST {{gateway-service-host}}/shopping/company/retrieve/orders
+x-tracking-id: {{$uuid}}
+Content-Type: application/json
+
+{
+  "userId": "userId3"
+}
+
+####
+POST {{gateway-service-host}}/shopping/company/retrieve/orders
+x-tracking-id: {{$uuid}}
+Content-Type: application/json
+
+{
+  "userId": "userId3",
+  "orderIds": [
+    "3a70254a-8894-47a0-b395-06617e079fa5"
+  ]
+}

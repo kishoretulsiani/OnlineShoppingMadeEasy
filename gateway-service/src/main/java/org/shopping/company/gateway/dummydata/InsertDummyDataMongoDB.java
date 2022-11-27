@@ -122,7 +122,6 @@ public class InsertDummyDataMongoDB {
                 .put("userEmail", "userId1@abc.com")
                 .put("firstName", "firstName")
                 .put("lastName", "lastName")
-                .put("address", "null")
                 .put("docType", "APPLICATION_USER");
 
         JsonObject user2 = new JsonObject()
@@ -130,7 +129,6 @@ public class InsertDummyDataMongoDB {
                 .put("userEmail", "userId2@abc.com")
                 .put("firstName", "firstName")
                 .put("lastName", "lastName")
-                .put("address", "null")
                 .put("docType", "APPLICATION_USER");
 
         JsonObject filter1 = new JsonObject()
