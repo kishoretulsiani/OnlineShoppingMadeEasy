@@ -11,8 +11,7 @@ class ApplicationUser {
     var userEmail: String? = null
     var firstName: String? = null
     var lastName: String? = null
-    var address: Address? = null
-    var ordersList: List<String>? = null
+    var ordersIds: List<String>? = null
     var docType: DocumentType = DocumentType.APPLICATION_USER
 }
 

@@ -13,6 +13,7 @@ import org.shopping.company.services.orders.steps.ApplyOffersStep;
 import org.shopping.company.services.orders.steps.CalculateOrderAmountsStep;
 import org.shopping.company.services.orders.steps.ConfirmInventoryStep;
 import org.shopping.company.services.orders.steps.CreateOrderStep;
+import org.shopping.company.services.orders.steps.UpdateApplicationUserStep;
 import org.shopping.company.services.orders.steps.UpdateItemsInventoryStep;
 import org.shopping.company.services.orders.steps.ValidateCreateOrderRequestStep;
 import org.shopping.company.services.orders.steps.ValidateLoggedInUserStep;
@@ -37,7 +38,7 @@ public class CreateOrderWorkflow {
 
     public CompletableFuture<Context> execute() {
 
-        logger.info("Workflow Started");
+        logger.info("CreateOrderWorkflow Workflow Started");
 
         CompletableFuture<Context> workflowFuture = new CompletableFuture();
 
@@ -59,6 +60,7 @@ public class CreateOrderWorkflow {
                 .thenCompose(new CalculateOrderAmountsStep(databaseHelper, dtoHelper, redisHelper)::execute)
                 .thenCompose(new ApplyOffersStep(databaseHelper, dtoHelper, redisHelper)::execute)
                 .thenCompose(new CreateOrderStep(databaseHelper, dtoHelper, redisHelper)::execute)
+                .thenCompose(new UpdateApplicationUserStep(databaseHelper, dtoHelper, redisHelper)::execute)
                 .thenAccept(context1 -> {
 
                     context.setResponsePayload(Json.encode(context1.getCreateOrderResponse()));

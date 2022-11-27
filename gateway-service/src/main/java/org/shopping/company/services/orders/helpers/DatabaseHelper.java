@@ -9,6 +9,7 @@ import org.shopping.common.components.exception.ApplicationException;
 import org.shopping.common.components.mongo.MongoDB;
 import org.shopping.common.components.utils.JsonUtility;
 import org.shopping.company.services.orders.workflow.Context;
+import org.shopping.datamodel.beans.ApplicationUser;
 import org.shopping.datamodel.beans.DBCollections;
 import org.shopping.datamodel.beans.DocumentType;
 import org.shopping.datamodel.beans.Order;
@@ -54,6 +55,14 @@ public class DatabaseHelper {
 
     }
 
+    public static Order orderMapper(JsonObject jsonObject) {
+
+        String str = jsonObject.toString();
+        Order order = JsonUtility.getInstance().getObject(str, Order.class);
+
+        return order;
+    }
+
     public CompletableFuture<Boolean> validateLoggedInUser(String requestUserId) {
 
         CompletableFuture<Boolean> validateLoggedInUserFuture = new CompletableFuture();
@@ -75,6 +84,63 @@ public class DatabaseHelper {
 
     }
 
+    public static ApplicationUser userMapper(JsonObject jsonObject) {
+
+        String str = jsonObject.toString();
+        ApplicationUser applicationUser = JsonUtility.getInstance().getObject(str, ApplicationUser.class);
+
+        return applicationUser;
+    }
+
+    public CompletableFuture<Boolean> updateApplicationUser(ApplicationUser user, String userId) {
+
+        CompletableFuture<Boolean> updateUserFuture = new CompletableFuture();
+
+        String orderObjStr = JsonUtility.getInstance().getString(user);
+        JsonObject jsonOrderObject = new JsonObject(orderObjStr);
+
+        JsonObject userFilter = new JsonObject().put("userId", userId);
+        BulkOperation replaceUserDoc = BulkOperation.createReplace(userFilter, jsonOrderObject).setUpsert(true);
+
+        List<BulkOperation> itemOperations = Arrays.asList(replaceUserDoc);
+
+        MongoDB.getClient().bulkWrite(DBCollections.APPLICATION_USERS.name(), itemOperations, itemResults -> {
+            if (itemResults.succeeded()) {
+                logger.info("Order updated successfully");
+                updateUserFuture.complete(true);
+            } else {
+                logger.info("Order updated failed");
+                updateUserFuture.complete(false);
+            }
+        });
+
+        return updateUserFuture;
+
+    }
+
+    public CompletableFuture<ApplicationUser> getApplicationUser(String requestUserId) {
+
+        CompletableFuture<ApplicationUser> validateLoggedInUserFuture = new CompletableFuture();
+
+        JsonObject filter = new JsonObject().put("userId", requestUserId);
+
+        MongoDB.getClient().find(DBCollections.APPLICATION_USERS.name(), filter, result -> {
+            if (result.succeeded() && result.result().size() > 0) {
+                logger.info("Userid in request successfully validated");
+                List<JsonObject> itemArrayList = result.result();
+                JsonObject userObj = itemArrayList.get(0);
+                ApplicationUser user = DatabaseHelper.userMapper(userObj);
+                validateLoggedInUserFuture.complete(user);
+            } else {
+                validateLoggedInUserFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INVALID_USER.getAlertCode(), ServiceAlerts.INVALID_USER.getAlertMessage(), null));
+            }
+        });
+
+
+        return validateLoggedInUserFuture;
+
+    }
+
     public static OrderItem objectMapper(JsonObject jsonObject) {
 
         OrderItem orderItem = new OrderItem();
@@ -87,6 +153,58 @@ public class DatabaseHelper {
         return orderItem;
     }
 
+    public CompletableFuture<List<String>> getUserOrderIds(String requestUserId) {
+
+        CompletableFuture<List<String>> getUserOrdersFuture = new CompletableFuture();
+        List<String> orderLdList = new ArrayList<>();
+
+        JsonObject filter = new JsonObject().put("userId", requestUserId);
+
+        MongoDB.getClient().find(DBCollections.APPLICATION_USERS.name(), filter, result -> {
+            if (result.succeeded() && result.result().size() > 0) {
+                logger.info("got orderIds for user");
+                List<JsonObject> itemArrayList = result.result();
+
+                JsonObject userObj = itemArrayList.get(0);
+
+                for (int i = 0; i < userObj.getJsonArray("ordersIds").size(); i++) {
+                    orderLdList.add(userObj.getJsonArray("ordersIds").getString(i));
+                }
+                getUserOrdersFuture.complete(orderLdList);
+            } else {
+                logger.info("user id do not have orders");
+                getUserOrdersFuture.completeExceptionally(new ApplicationException(ServiceAlerts.NO_ORDERS_FOUND.getAlertCode(), ServiceAlerts.NO_ORDERS_FOUND.getAlertMessage(), null));
+            }
+        });
+
+
+        return getUserOrdersFuture;
+
+    }
+
+    public CompletableFuture<List<Order>> getUserOrders(List<String> orderIds) {
+
+        CompletableFuture<List<Order>> getOrdersFuture = new CompletableFuture();
+
+        JsonObject queryParam = new JsonObject().put("orderId", new JsonObject().put("$in", orderIds));
+
+        MongoDB.getClient().find(DBCollections.ORDERS.name(), queryParam, result -> {
+            if (result.succeeded()) {
+                List<JsonObject> ordersList = result.result();
+
+                List<Order> orders = ordersList.stream().map(DatabaseHelper::orderMapper).collect(Collectors.toList());
+
+                getOrdersFuture.complete(orders);
+
+            } else {
+                getOrdersFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
+            }
+        });
+
+        return getOrdersFuture;
+
+    }
+
     public CompletableFuture<List<OrderItem>> getOrderItems(List<OrderItem> requestOrderItems) {
 
         CompletableFuture<List<OrderItem>> getOrderItemsFuture = new CompletableFuture();
@@ -96,8 +214,7 @@ public class DatabaseHelper {
             itemIds.add(orderItem.getItemId());
         });
 
-        JsonObject queryParam = new JsonObject()
-                .put("itemId", new JsonObject().put("$in", itemIds));
+        JsonObject queryParam = new JsonObject().put("itemId", new JsonObject().put("$in", itemIds));
 
         MongoDB.getClient().find(DBCollections.ORDER_ITEMS.name(), queryParam, result -> {
             if (result.succeeded()) {
@@ -124,8 +241,7 @@ public class DatabaseHelper {
             getOffersFuture.complete(offersCache);
         } else {
             offersCache = new HashMap<>();
-            JsonObject queryParam = new JsonObject()
-                    .put("docType", DocumentType.OFFER.name());
+            JsonObject queryParam = new JsonObject().put("docType", DocumentType.OFFER.name());
 
             MongoDB.getClient().find(DBCollections.OFFERS.name(), queryParam, result -> {
                 if (result.succeeded()) {

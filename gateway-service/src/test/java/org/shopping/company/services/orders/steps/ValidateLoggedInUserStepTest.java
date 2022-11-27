@@ -8,12 +8,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.shopping.common.components.constants.ServiceAlerts;
 import org.shopping.common.components.exception.ApplicationException;
 import org.shopping.company.common.testhelper.TestDataHelper;
 import org.shopping.company.services.orders.helpers.DTOHelper;
 import org.shopping.company.services.orders.helpers.DatabaseHelper;
 import org.shopping.company.services.orders.helpers.RedisHelper;
 import org.shopping.company.services.orders.workflow.Context;
+import org.shopping.datamodel.beans.ApplicationUser;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -42,14 +44,14 @@ public class ValidateLoggedInUserStepTest {
     }
 
     @Test
-    public void reqeuest_for_valid_user_test() {
+    public void request_for_valid_user_test() {
         Context context = new Context();
         JsonObject createOrderRequest = TestDataHelper.readCreateOrderRequestFromFile("create-order-success-request.json");
         context.setRequestObject(createOrderRequest);
 
 
-        CompletableFuture<Boolean> response = CompletableFuture.completedFuture(Boolean.TRUE);
-        EasyMock.expect(databaseHelper.validateLoggedInUser(EasyMock.anyString())).andReturn(response);
+        CompletableFuture<ApplicationUser> response = CompletableFuture.completedFuture(TestDataHelper.getApplicationUser());
+        EasyMock.expect(databaseHelper.getApplicationUser(EasyMock.anyString())).andReturn(response);
         EasyMock.replay(databaseHelper);
         CompletableFuture<Context> completableFuture = validateLoggedInUserStep.execute(context);
         completableFuture.join();
@@ -63,9 +65,8 @@ public class ValidateLoggedInUserStepTest {
         JsonObject createOrderRequest = TestDataHelper.readCreateOrderRequestFromFile("create-order-success-request.json");
         context.setRequestObject(createOrderRequest);
 
-
-        CompletableFuture<Boolean> response = CompletableFuture.completedFuture(Boolean.FALSE);
-        EasyMock.expect(databaseHelper.validateLoggedInUser(EasyMock.anyString())).andReturn(response);
+        EasyMock.expect(databaseHelper.getApplicationUser(EasyMock.anyString()))
+                .andReturn(CompletableFuture.failedFuture(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null)));
         EasyMock.replay(databaseHelper);
         CompletableFuture<Context> completableFuture = validateLoggedInUserStep.execute(context).exceptionally(throwable -> {
             Assert.assertTrue(throwable instanceof ApplicationException);
@@ -81,8 +82,8 @@ public class ValidateLoggedInUserStepTest {
         Context context = new Context();
         context.setRequestObject(new JsonObject());
 
-        CompletableFuture<Boolean> response = CompletableFuture.completedFuture(Boolean.FALSE);
-        EasyMock.expect(databaseHelper.validateLoggedInUser(EasyMock.anyString())).andReturn(response);
+        CompletableFuture<ApplicationUser> response = CompletableFuture.completedFuture(TestDataHelper.getApplicationUser());
+        EasyMock.expect(databaseHelper.getApplicationUser(EasyMock.anyString())).andReturn(response);
         EasyMock.replay(databaseHelper);
         CompletableFuture<Context> completableFuture = validateLoggedInUserStep.execute(context).exceptionally(throwable -> {
             Assert.assertTrue(throwable instanceof ApplicationException);

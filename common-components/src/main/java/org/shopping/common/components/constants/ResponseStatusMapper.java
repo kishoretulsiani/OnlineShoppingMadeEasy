@@ -16,6 +16,8 @@ public class ResponseStatusMapper {
         statusCodeMap.put(ServiceAlerts.MANDATORY_DATA_MISSING.code, new ResponseStatus("mandatory_data_missing", "mandatory_data_missing", 400));
         statusCodeMap.put(ServiceAlerts.INVALID_USER.code, new ResponseStatus("not_authorized", "not_authorized", 401));
         statusCodeMap.put(ServiceAlerts.ITEM_OUT_OF_STOCK.code, new ResponseStatus("item_out_of_stock", "item_out_of_stock", 200));
+        statusCodeMap.put(ServiceAlerts.NO_ORDERS_FOUND.code, new ResponseStatus("no_orders_found", "no_orders_found", 200));
+
     }
 
     public static Map<Integer, ResponseStatus> getStatusCodeMap() {

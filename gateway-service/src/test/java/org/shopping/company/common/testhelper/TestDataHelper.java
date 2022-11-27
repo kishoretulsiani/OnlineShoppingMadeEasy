@@ -2,6 +2,7 @@ package org.shopping.company.common.testhelper;
 
 
 import io.vertx.core.json.JsonObject;
+import org.shopping.datamodel.beans.ApplicationUser;
 import org.shopping.datamodel.beans.DocumentType;
 import org.shopping.datamodel.beans.OrderAmountSummary;
 import org.shopping.datamodel.beans.OrderItem;
@@ -74,6 +75,16 @@ public class TestDataHelper {
         orderAmountSummary.setTotalDiscount(null);
         orderAmountSummary.setTotalTax("0.29");
         return orderAmountSummary;
+    }
+
+    public static ApplicationUser getApplicationUser() {
+        ApplicationUser user = new ApplicationUser();
+
+        user.setUserId("userId1");
+        user.setUserEmail("userId1@abc.com");
+        user.setFirstName("firstName");
+        user.setLastName("lastName");
+        return user;
     }
 
 

@@ -42,6 +42,8 @@ public class DeployVerticle extends AbstractVerticle {
 
     private static final String ORDERS_API = "orders";
 
+    private static final String RETRIEVE_ORDERS_API = "retrieve/orders";
+
     private static OrdersService ordersService = null;
 
     private static Set<String> setCorsHeaders() {
@@ -105,6 +107,7 @@ public class DeployVerticle extends AbstractVerticle {
         router.route(API_CONTEXT_ROOT).failureHandler(new ExceptionHandler(responseStatusMapper));
         router.route().handler(this::getCORSHandler);
         router.post(BASE_PATH + ORDERS_API).handler(this::handleOrdersRequest);
+        router.post(BASE_PATH + RETRIEVE_ORDERS_API).handler(this::handleRetrieveOrdersRequest);
         router.get("/health").handler(this::healthCheck);
 
         // Starting httpserver after core components are initialized successfully.
@@ -132,6 +135,15 @@ public class DeployVerticle extends AbstractVerticle {
         routingContext.put("apiName", "handleOrdersRequest");
         routingContext.put("startTime", System.currentTimeMillis());
         ordersService.createOrder(incomingRequest, ResponseHandler.responseHandler(routingContext));
+    }
+
+    private void handleRetrieveOrdersRequest(RoutingContext routingContext) {
+        JsonObject incomingRequest = routingContext.getBodyAsJson();
+        MultiMap headers = routingContext.request().headers();
+        logger.info("Retrieve Orders Request Received = " + incomingRequest.toString());
+        routingContext.put("apiName", "handleOrdersRequest");
+        routingContext.put("startTime", System.currentTimeMillis());
+        ordersService.retrieveOrders(incomingRequest, ResponseHandler.responseHandler(routingContext));
     }
 
     // health check can be implemented in several ways
