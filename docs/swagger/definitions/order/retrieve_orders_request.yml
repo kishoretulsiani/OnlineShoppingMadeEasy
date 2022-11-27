@@ -1,0 +1,13 @@
+type: object
+description: Account update event.
+required:
+  - userId
+properties:
+  userId:
+    type: string
+    example: userId3
+  orderIds:
+    type: array
+    items:
+      type: string
+      example: 3a70254a-8894-47a0-b395-06617e079fa5

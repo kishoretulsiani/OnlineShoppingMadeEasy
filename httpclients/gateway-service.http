@@ -1,11 +1,12 @@
 
 #####
+##### Create Order endpoint
 POST {{gateway-service-host}}/shopping/company/orders
 x-tracking-id: {{$uuid}}
 Content-Type: application/json
 
 {
-  "userId": "userId3",
+  "userId": "userId2",
   "itemDetails": [
     {
       "itemId": "item1",
@@ -24,23 +25,24 @@ Content-Type: application/json
 }
 
 ###
-
+##### retreive ALL Orders for a user
 POST {{gateway-service-host}}/shopping/company/retrieve/orders
 x-tracking-id: {{$uuid}}
 Content-Type: application/json
 
 {
-  "userId": "userId3"
+  "userId": "userId2"
 }
 
 ####
+##### retreive particular Order for a user
 POST {{gateway-service-host}}/shopping/company/retrieve/orders
 x-tracking-id: {{$uuid}}
 Content-Type: application/json
 
 {
-  "userId": "userId3",
+  "userId": "userId2",
   "orderIds": [
-    "3a70254a-8894-47a0-b395-06617e079fa5"
+    "dcdb28bc-b478-4eee-904c-8a29c84e9b6a"
   ]
 }

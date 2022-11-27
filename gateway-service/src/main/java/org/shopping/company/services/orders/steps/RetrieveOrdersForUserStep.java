@@ -42,7 +42,7 @@ public class RetrieveOrdersForUserStep implements WorkflowStep {
 
             List<String> requestOrderIds = context.getRetrieveOrdersRequest().getOrderIds();
 
-            if (orderIds.containsAll(requestOrderIds)) {
+            if (requestOrderIds != null && requestOrderIds.size() > 0 && orderIds.containsAll(requestOrderIds)) {
                 // dirty way to return only what is asked in request :)
                 orderIds = requestOrderIds;
             } else {

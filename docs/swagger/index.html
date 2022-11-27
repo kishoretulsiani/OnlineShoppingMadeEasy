@@ -57,7 +57,6 @@
 <body>
 <div class="tab">
     <button id="v1-tab" class="tablinks" onclick="javascript:location.href='index.html?type=V1'">Order Service</button>
-    <button id="v2-tab" class="tablinks" onclick="javascript:location.href='index.html?type=V2'">Offers Service</button>
 </div>
 
 <redoc></redoc>
@@ -65,7 +64,6 @@
 
 <script>
     var v1Url = './order-service-apis-v1.yml';
-    var v2Url = './offers-service-apis-v1.yml';
 
     var url = new URL(window.location.href);
     var type = url.searchParams.get("type");
@@ -88,11 +86,6 @@
                 specUrl = v1Url;
                 Redoc.init(v1Url);
                 document.getElementById("v1-tab").className += " active";
-                break;
-            case 'V2' :
-                specUrl = v2Url;
-                Redoc.init(v2Url);
-                document.getElementById("v2-tab").className += " active";
                 break;
             default :
                 specUrl = v1Url;

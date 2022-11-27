@@ -9,8 +9,10 @@ info:
   version: "1.0.0"
 
 paths:
-  /order:
-    $ref: ./paths/order.yml
+  /shopping/company/orders:
+    $ref: ./paths/create_orders.yml
+  /shopping/company/retrieve/orders:
+    $ref: ./paths/retrieve_orders.yml
 
 schemes:
   - https

@@ -72,7 +72,7 @@ public class InsertDummyDataMongoDB {
         });
 
         Promise<Void> orderItemsCollectionPromise = Promise.promise();
-        MongoDB.getClient().createCollection(DBCollections.APPLICATION_USERS.name(), res -> {
+        MongoDB.getClient().createCollection(DBCollections.ORDER_ITEMS.name(), res -> {
             if (res.succeeded()) {
                 logger.info("Collection got created successfully");
                 orderItemsCollectionPromise.complete();

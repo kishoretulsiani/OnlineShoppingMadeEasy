@@ -1,13 +1,34 @@
 type: object
 description: Account update event.
 required:
-  - status_code
-  - status_code_type
-  - events
+  - userId
+  - itemDetails
+  - paymentDetails
+  - shippingAddressId
 properties:
-  status_code:
+  userId:
     type: string
-    enum: [SUCCESS]
-  status_code_type:
+    example: userId3
+  itemDetails:
+    type: array
+    items:
+      type: object
+      properties:
+        itemId:
+          type: string
+          example: item1
+        itemQuantity:
+          type: string
+          example: 2
+  paymentDetails:
+    type: object
+    properties:
+      paymentId:
+        type: string
+        example: 1234567890
+      cvv:
+        type: string
+        example: 456
+  shippingAddressId:
     type: string
-    enum: [SUCCESS]
+    example: 34987654
