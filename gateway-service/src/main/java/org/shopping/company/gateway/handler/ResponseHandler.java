@@ -25,6 +25,8 @@ public class ResponseHandler {
 
                 String responsePayload = jsonObject.getString(GatewayConstant.RESPONSE_PAYLOAD);
 
+                logger.info("responsePayload is == " + responsePayload);
+
                 routingContext.response()
                         .putHeader(GatewayConstant.X_TRACKING_ID, trackingId)
                         .putHeader(GatewayConstant.CONTENT_TYPE, GatewayConstant.APPLICATION_JSON)

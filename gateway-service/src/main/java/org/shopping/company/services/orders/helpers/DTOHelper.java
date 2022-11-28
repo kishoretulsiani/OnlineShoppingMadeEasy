@@ -21,6 +21,8 @@ public class DTOHelper {
     private static final Logger logger = LoggerFactory.getLogger(DTOHelper.class);
 
 
+    // this function should be only called once in workflow as it assigns new order id.
+    // always creates order in PROCESSING status
     public void createOrderDetails(Order order) {
         OrderDetails orderDetails = new OrderDetails();
         order.setOrderId(UUID.randomUUID().toString());
@@ -29,6 +31,7 @@ public class DTOHelper {
         order.setOrderDetails(orderDetails);
     }
 
+    // just a dummy object.. functionality is really not implemented
     public void createPaymentDetails(Order order) {
         PaymentDetails paymentDetails = new PaymentDetails();
         paymentDetails.setPaymentId(UUID.randomUUID().toString());
@@ -37,6 +40,7 @@ public class DTOHelper {
         order.setPaymentDetails(paymentDetails);
     }
 
+    // just a dummy object.. functionality is really not implemented
     public void createShippingDetails(Order order, Context context) {
         ArrayList<ShippingDetails> shippingDetailsArrayList = new ArrayList<>();
         for (OrderItem orderItem : context.getOrder().getOrderItems()) {
@@ -48,6 +52,7 @@ public class DTOHelper {
         order.setShippingSummary(shippingDetailsArrayList);
     }
 
+    // getting order quantity from request and updating order object to save in database
     public void updateOrderQuantity(List<OrderItem> orderItemsInRequest, List<OrderItem> responseOrderItems) {
 
         HashMap<String, Integer> itemIdAndQuantity = new HashMap<>();

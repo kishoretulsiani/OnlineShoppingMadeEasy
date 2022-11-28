@@ -31,7 +31,7 @@ public class RetrieveOrdersResponseStep implements WorkflowStep {
 
     @Override
     public CompletableFuture<Context> execute(Context context) {
-        logger.info("Workflow RetrieveOrdersResponseStep Executed");
+        logger.info("Executing RetrieveOrdersResponseStep Step");
         CompletableFuture<Context> retrieveOrdersResponseStepFuture = new CompletableFuture();
 
         RetrieveOrdersResponse retrieveOrdersResponse = new RetrieveOrdersResponse();
@@ -39,8 +39,10 @@ public class RetrieveOrdersResponseStep implements WorkflowStep {
         if (context.getOrders() != null && context.getOrders().size() > 0) {
             retrieveOrdersResponse.setOrders(context.getOrders());
             context.setRetrieveOrdersResponse(retrieveOrdersResponse);
+            logger.info("RetrieveOrdersResponseStep Step completed");
             retrieveOrdersResponseStepFuture.complete(context);
         } else {
+            logger.info("RetrieveOrdersResponseStep Step completed with no Orders");
             retrieveOrdersResponseStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.NO_ORDERS_FOUND.getAlertCode(), ServiceAlerts.NO_ORDERS_FOUND.getAlertMessage(), null));
         }
 

@@ -26,7 +26,7 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public void createOrder(JsonObject request, Handler<AsyncResult<JsonObject>> asyncResultHandler) {
 
-        logger.info("createOrder Request Received");
+        logger.info("OrdersServiceImpl createOrder Request Received");
 
         Context context = new Context();
         try {
@@ -38,6 +38,7 @@ public class OrdersServiceImpl implements OrdersService {
                         JsonObject respJson = new JsonObject();
                         respJson.put(GatewayConstant.RESPONSE_PAYLOAD, context.getResponsePayload());
                         respJson.put(GatewayConstant.HTTP_STATUS, 200);
+                        logger.info("OrdersServiceImpl createOrder Request Completed");
                         asyncResultHandler.handle(Future.succeededFuture(respJson));
                     })
                     .exceptionally(throwable -> {
@@ -64,7 +65,7 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public void retrieveOrders(JsonObject request, Handler<AsyncResult<JsonObject>> asyncResultHandler) {
 
-        logger.info("retrieveOrders Request Received");
+        logger.info("OrdersServiceImpl retrieveOrders Request Received");
 
         Context context = new Context();
         try {
@@ -72,10 +73,11 @@ public class OrdersServiceImpl implements OrdersService {
             RetrieveOrdersWorkflow retrieveOrdersWorkflow = new RetrieveOrdersWorkflow(context);
             retrieveOrdersWorkflow.execute()
                     .thenAccept(workflowContext -> {
-                        logger.info("retrieveOrders Processing Success Response");
+                        logger.info("OrdersServiceImpl retrieveOrders Processing Success Response");
                         JsonObject respJson = new JsonObject();
                         respJson.put(GatewayConstant.RESPONSE_PAYLOAD, context.getResponsePayload());
                         respJson.put(GatewayConstant.HTTP_STATUS, 200);
+                        logger.info("OrdersServiceImpl retrieveOrders Request Completed");
                         asyncResultHandler.handle(Future.succeededFuture(respJson));
                     })
                     .exceptionally(throwable -> {

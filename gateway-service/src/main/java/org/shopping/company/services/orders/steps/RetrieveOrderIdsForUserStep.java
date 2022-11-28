@@ -34,7 +34,7 @@ public class RetrieveOrderIdsForUserStep implements WorkflowStep {
 
     @Override
     public CompletableFuture<Context> execute(Context context) {
-        logger.info("Workflow ValidateLoggedInUserStep Executed");
+        logger.info("Executing RetrieveOrderIdsForUserStep Step");
 
         CompletableFuture<Context> retrieveOrderIdsForUserStepFuture = new CompletableFuture();
 
@@ -50,11 +50,13 @@ public class RetrieveOrderIdsForUserStep implements WorkflowStep {
             databaseHelper.getUserOrderIds(requestUserId).thenAccept(userOrderIds -> {
                 if (userOrderIds.size() > 0) {
                     context.setUserOrderIds(userOrderIds);
+                    logger.info("RetrieveOrderIdsForUserStep Step completed");
                     retrieveOrderIdsForUserStepFuture.complete(context);
                 } else {
                     retrieveOrderIdsForUserStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.NO_ORDERS_FOUND.getAlertCode(), ServiceAlerts.NO_ORDERS_FOUND.getAlertMessage(), null));
                 }
             }).exceptionally(throwable -> {
+                logger.info("error occurred in  RetrieveOrderIdsForUserStep" + throwable.getMessage());
                 retrieveOrderIdsForUserStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.NO_ORDERS_FOUND.getAlertCode(), ServiceAlerts.NO_ORDERS_FOUND.getAlertMessage(), null));
                 return null;
             });

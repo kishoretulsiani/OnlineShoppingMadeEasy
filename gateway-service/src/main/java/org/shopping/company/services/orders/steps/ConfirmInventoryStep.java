@@ -34,7 +34,7 @@ public class ConfirmInventoryStep implements WorkflowStep {
 
     @Override
     public CompletableFuture<Context> execute(Context context) {
-        logger.info("Workflow ConfirmAndUpdateItemsInventoryStep Executed");
+        logger.info("Executing ConfirmInventoryStep Step");
 
         CompletableFuture<Context> confirmAndUpdateItemsInventoryStepFuture = new CompletableFuture();
 
@@ -47,25 +47,23 @@ public class ConfirmInventoryStep implements WorkflowStep {
         HashMap<String, Integer> itemInventory = new HashMap<>();
 
         orderItemArrayList.forEach(orderItem -> {
-            itemInventoryFutureList.add(
-                    redisHelper.getItemInventoryIfExists(orderItem.getItemId(), orderItem.getItemQuantity()).thenAccept(integer -> {
-                        itemInventory.put(orderItem.getItemId(), integer);
-                    })
-            );
+            itemInventoryFutureList.add(redisHelper.getItemInventoryIfExists(orderItem.getItemId(), orderItem.getItemQuantity()).thenAccept(integer -> {
+                itemInventory.put(orderItem.getItemId(), integer);
+            }));
         });
-
 
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(itemInventoryFutureList.toArray(new CompletableFuture[itemInventoryFutureList.size()]));
 
         allFutures.thenApply(unused -> {
 
             context.setItemInventory(itemInventory);
+            logger.info(" ConfirmInventoryStep Step completed ");
             confirmAndUpdateItemsInventoryStepFuture.complete(context);
 
             return null;
         }).exceptionally(throwable -> {
+            logger.info(" error occurred in  ConfirmInventoryStep " + throwable.getMessage());
             confirmAndUpdateItemsInventoryStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.ITEM_OUT_OF_STOCK.getAlertCode(), ServiceAlerts.ITEM_OUT_OF_STOCK.getAlertMessage(), null));
-
             return null;
         });
 

@@ -27,7 +27,5 @@ data class Context(
         var itemInventory: HashMap<String?, Int?>? = null,
         var isOrderSavedInDB: Boolean? = null,
         var order: Order? = null
-
-
 );
 

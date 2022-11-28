@@ -30,6 +30,7 @@ public class DatabaseHelper {
 
 
     public CompletableFuture<Boolean> orderCreateUpsert(Order order, Context context) {
+        logger.info("CreateUpsert order");
 
         CompletableFuture<Boolean> orderUpdateFuture = new CompletableFuture();
 
@@ -43,10 +44,10 @@ public class DatabaseHelper {
 
         MongoDB.getClient().bulkWrite(DBCollections.ORDERS.name(), itemOperations, itemResults -> {
             if (itemResults.succeeded()) {
-                logger.info("Order updated successfully");
+                logger.info("Order CreateUpsert successful");
                 orderUpdateFuture.complete(true);
             } else {
-                logger.info("Order updated failed");
+                logger.info("Order CreateUpsert failed");
                 orderUpdateFuture.complete(false);
             }
         });
@@ -63,27 +64,6 @@ public class DatabaseHelper {
         return order;
     }
 
-    public CompletableFuture<Boolean> validateLoggedInUser(String requestUserId) {
-
-        CompletableFuture<Boolean> validateLoggedInUserFuture = new CompletableFuture();
-
-        JsonObject filter = new JsonObject().put("userId", requestUserId);
-
-        MongoDB.getClient().find(DBCollections.APPLICATION_USERS.name(), filter, result -> {
-            if (result.succeeded() && result.result().size() > 0) {
-                logger.info("Userid in request successfully validated");
-                validateLoggedInUserFuture.complete(true);
-            } else {
-                logger.info("Userid in request is invalid");
-                validateLoggedInUserFuture.complete(false);
-            }
-        });
-
-
-        return validateLoggedInUserFuture;
-
-    }
-
     public static ApplicationUser userMapper(JsonObject jsonObject) {
 
         String str = jsonObject.toString();
@@ -93,6 +73,8 @@ public class DatabaseHelper {
     }
 
     public CompletableFuture<Boolean> updateApplicationUser(ApplicationUser user, String userId) {
+
+        logger.info("updating Application user");
 
         CompletableFuture<Boolean> updateUserFuture = new CompletableFuture();
 
@@ -106,11 +88,11 @@ public class DatabaseHelper {
 
         MongoDB.getClient().bulkWrite(DBCollections.APPLICATION_USERS.name(), itemOperations, itemResults -> {
             if (itemResults.succeeded()) {
-                logger.info("Order updated successfully");
+                logger.info("updateApplicationUser updated successfully");
                 updateUserFuture.complete(true);
             } else {
-                logger.info("Order updated failed");
-                updateUserFuture.complete(false);
+                logger.info("updateApplicationUser updated failed");
+                updateUserFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
             }
         });
 
@@ -155,6 +137,8 @@ public class DatabaseHelper {
 
     public CompletableFuture<List<String>> getUserOrderIds(String requestUserId) {
 
+        logger.info("getting orderIds for user");
+
         CompletableFuture<List<String>> getUserOrdersFuture = new CompletableFuture();
         List<String> orderLdList = new ArrayList<>();
 
@@ -172,7 +156,7 @@ public class DatabaseHelper {
                 }
                 getUserOrdersFuture.complete(orderLdList);
             } else {
-                logger.info("user id do not have orders");
+                logger.info("user id does not have orders");
                 getUserOrdersFuture.completeExceptionally(new ApplicationException(ServiceAlerts.NO_ORDERS_FOUND.getAlertCode(), ServiceAlerts.NO_ORDERS_FOUND.getAlertMessage(), null));
             }
         });
@@ -183,13 +167,14 @@ public class DatabaseHelper {
     }
 
     public CompletableFuture<List<Order>> getUserOrders(List<String> orderIds) {
-
+        logger.info("getting order details for orderIds");
         CompletableFuture<List<Order>> getOrdersFuture = new CompletableFuture();
 
         JsonObject queryParam = new JsonObject().put("orderId", new JsonObject().put("$in", orderIds));
 
         MongoDB.getClient().find(DBCollections.ORDERS.name(), queryParam, result -> {
             if (result.succeeded()) {
+                logger.info("fetched all order details for orderIds");
                 List<JsonObject> ordersList = result.result();
 
                 List<Order> orders = ordersList.stream().map(DatabaseHelper::orderMapper).collect(Collectors.toList());
@@ -197,6 +182,7 @@ public class DatabaseHelper {
                 getOrdersFuture.complete(orders);
 
             } else {
+                logger.error("could not fetch all order details for orderIds");
                 getOrdersFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
             }
         });
@@ -207,6 +193,7 @@ public class DatabaseHelper {
 
     public CompletableFuture<List<OrderItem>> getOrderItems(List<OrderItem> requestOrderItems) {
 
+        logger.info("getting order item details for requestOrderItems");
         CompletableFuture<List<OrderItem>> getOrderItemsFuture = new CompletableFuture();
 
         ArrayList<String> itemIds = new ArrayList();
@@ -218,6 +205,7 @@ public class DatabaseHelper {
 
         MongoDB.getClient().find(DBCollections.ORDER_ITEMS.name(), queryParam, result -> {
             if (result.succeeded()) {
+                logger.info("fetched all requestOrderItems details");
                 List<JsonObject> itemArrayList = result.result();
 
                 List<OrderItem> orderItemList = itemArrayList.stream().map(DatabaseHelper::objectMapper).collect(Collectors.toList());
@@ -225,6 +213,7 @@ public class DatabaseHelper {
                 getOrderItemsFuture.complete(orderItemList);
 
             } else {
+                logger.info("could not fetch all requestOrderItems details");
                 getOrderItemsFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
             }
         });
@@ -234,17 +223,21 @@ public class DatabaseHelper {
     }
 
     public CompletableFuture<HashMap<String, String>> getOffersCache() {
+        logger.info("getting all offers from DB");
 
         CompletableFuture<HashMap<String, String>> getOffersFuture = new CompletableFuture();
 
         if (offersCache != null) {
+            logger.info("returning offers from cache");
             getOffersFuture.complete(offersCache);
         } else {
+            logger.info("returning offers from DB");
             offersCache = new HashMap<>();
             JsonObject queryParam = new JsonObject().put("docType", DocumentType.OFFER.name());
 
             MongoDB.getClient().find(DBCollections.OFFERS.name(), queryParam, result -> {
                 if (result.succeeded()) {
+                    logger.info("retrieved all offer details and building cache now");
                     List<JsonObject> offersList = result.result();
                     offersList.forEach(offer -> {
                         String offerType = offer.getString("offerType");
@@ -255,6 +248,7 @@ public class DatabaseHelper {
                     });
                     getOffersFuture.complete(offersCache);
                 } else {
+                    logger.info("error occurred while getting offer details");
                     getOffersFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
                 }
             });

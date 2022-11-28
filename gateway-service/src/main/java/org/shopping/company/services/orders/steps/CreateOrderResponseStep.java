@@ -14,9 +14,9 @@ import org.shopping.datamodel.beans.ORDER_STATUS;
 
 import java.util.concurrent.CompletableFuture;
 
-public class CreateOrderStep implements WorkflowStep {
+public class CreateOrderResponseStep implements WorkflowStep {
 
-    private final Logger logger = LoggerFactory.getLogger(CreateOrderStep.class);
+    private final Logger logger = LoggerFactory.getLogger(CreateOrderResponseStep.class);
 
     DatabaseHelper databaseHelper;
 
@@ -24,7 +24,7 @@ public class CreateOrderStep implements WorkflowStep {
 
     RedisHelper redisHelper;
 
-    public CreateOrderStep(DatabaseHelper databaseHelper, DTOHelper dtoHelper, RedisHelper redisHelper) {
+    public CreateOrderResponseStep(DatabaseHelper databaseHelper, DTOHelper dtoHelper, RedisHelper redisHelper) {
         this.databaseHelper = databaseHelper;
         this.dtoHelper = dtoHelper;
         this.redisHelper = redisHelper;
@@ -32,7 +32,7 @@ public class CreateOrderStep implements WorkflowStep {
 
     @Override
     public CompletableFuture<Context> execute(Context context) {
-        logger.info("Workflow Step2 Executed");
+        logger.info("Executing CreateOrderResponseStep Step");
         CompletableFuture<Context> createOrderStepFuture = new CompletableFuture();
 
         CreateOrderResponse createOrderResponse = new CreateOrderResponse();
@@ -48,10 +48,15 @@ public class CreateOrderStep implements WorkflowStep {
         databaseHelper.orderCreateUpsert(context.getOrder(), context).thenAccept(orderUpdated -> {
             if (orderUpdated) {
                 context.setCreateOrderResponse(createOrderResponse);
+                logger.info("CreateOrderResponseStep Step completed");
                 createOrderStepFuture.complete(context);
             } else {
                 createOrderStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
             }
+        }).exceptionally(throwable -> {
+            logger.info("error occurred in  CreateOrderResponseStep" + throwable.getMessage());
+            createOrderStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
+            return null;
         });
 
 
