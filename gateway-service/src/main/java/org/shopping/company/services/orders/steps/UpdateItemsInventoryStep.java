@@ -34,7 +34,7 @@ public class UpdateItemsInventoryStep implements WorkflowStep {
 
     @Override
     public CompletableFuture<Context> execute(Context context) {
-        logger.info("Workflow ConfirmAndUpdateItemsInventoryStep Executed");
+        logger.info("Executing UpdateItemsInventoryStep Step");
 
         CompletableFuture<Context> confirmAndUpdateItemsInventoryStepFuture = new CompletableFuture();
 
@@ -60,12 +60,13 @@ public class UpdateItemsInventoryStep implements WorkflowStep {
             dtoHelper.createOrderDetails(order);
             context.setOrder(order);
 
+            logger.info("UpdateItemsInventoryStep Step completed");
             confirmAndUpdateItemsInventoryStepFuture.complete(context);
 
             return null;
         }).exceptionally(throwable -> {
+            logger.info("error occurred in  UpdateItemsInventoryStep" + throwable.getMessage());
             confirmAndUpdateItemsInventoryStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
-
             return null;
         });
 

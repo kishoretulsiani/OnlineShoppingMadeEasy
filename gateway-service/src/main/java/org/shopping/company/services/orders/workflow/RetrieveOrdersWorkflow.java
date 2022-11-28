@@ -38,9 +38,9 @@ public class RetrieveOrdersWorkflow {
         CompletableFuture<Context> workflowFuture = new CompletableFuture();
 
 
-        // following steps will be executed in sequence to retrieve orders
+        // Following steps will be executed in sequence to retrieve orders
 
-        // validate logged in customer
+        // validate logged in customer - NOT IMPLEMENTED YET
         // retrieve order ids for user
         // retrieve order details
         // create response
@@ -50,14 +50,17 @@ public class RetrieveOrdersWorkflow {
                 .thenCompose(new RetrieveOrdersForUserStep(databaseHelper, dtoHelper, redisHelper)::execute)
                 .thenCompose(new RetrieveOrdersResponseStep(databaseHelper, dtoHelper, redisHelper)::execute)
                 .thenAccept(context1 -> {
+
                     context.setResponsePayload(Json.encode(context1.getRetrieveOrdersResponse()));
-                    logger.info("Workflow Completed");
                     ResponseStatus responseStatus = ResponseStatusMapper.getStatusCodeMap().get(ServiceAlerts.SUCCESS.getAlertCode());
                     context1.setResponseStatus(responseStatus);
+                    logger.info("RetrieveOrdersWorkflow Completed");
                     workflowFuture.complete(context1);
 
                 }).exceptionally(throwable -> {
-                    logger.error("Error occurred in executing workflow.");
+                    logger.error("Error occurred in executing RetrieveOrdersWorkflow.");
+
+
                     workflowFuture.completeExceptionally(throwable);
                     return null;
                 });

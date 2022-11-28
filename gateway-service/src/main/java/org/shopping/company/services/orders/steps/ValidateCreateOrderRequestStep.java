@@ -35,7 +35,7 @@ public class ValidateCreateOrderRequestStep implements WorkflowStep {
 
     @Override
     public CompletableFuture<Context> execute(Context context) {
-        logger.info("Workflow Step1 Executed");
+        logger.info("Executing ValidateCreateOrderRequestStep Step");
         CompletableFuture<Context> validateCreateOrderRequestFuture = new CompletableFuture();
         ArrayList<String> errorArgs = new ArrayList<>();
 
@@ -49,14 +49,27 @@ public class ValidateCreateOrderRequestStep implements WorkflowStep {
             logger.info("Request got converted to object");
 
             if (StringUtils.isBlank(createOrderRequest.getShippingAddressId())) {
-                errorArgs.add("missing_shipping_address");
+                errorArgs.add("missing_shipping_details");
+            }
+            if (StringUtils.isBlank(createOrderRequest.getUserId())) {
+                errorArgs.add("missing_user_id");
+            }
+            if (createOrderRequest.getItemDetails() == null || createOrderRequest.getItemDetails().size() == 0) {
+                errorArgs.add("missing_item_details");
+            }
+            if (createOrderRequest.getPaymentDetails() == null) {
+                errorArgs.add("missing_payment_detials");
             }
         }
 
+        logger.info("ValidateCreateOrderRequestStep Step errorArgs = " + errorArgs.toString());
+
         if (errorArgs.size() == 0) {
             context.setCreateOrderRequest(createOrderRequest);
+            logger.info("ValidateCreateOrderRequestStep Step completed");
             validateCreateOrderRequestFuture.complete(context);
         } else {
+            logger.info("ValidateCreateOrderRequestStep Step completed with MANDATORY_DATA_MISSING");
             validateCreateOrderRequestFuture.completeExceptionally(new ApplicationException(ServiceAlerts.MANDATORY_DATA_MISSING.getAlertCode(), errorArgs.toString(), null));
         }
 

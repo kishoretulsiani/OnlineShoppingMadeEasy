@@ -2,6 +2,8 @@ package org.shopping.company.services.orders.steps;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.shopping.common.components.constants.ServiceAlerts;
+import org.shopping.common.components.exception.ApplicationException;
 import org.shopping.company.services.orders.helpers.DTOHelper;
 import org.shopping.company.services.orders.helpers.DatabaseHelper;
 import org.shopping.company.services.orders.helpers.RedisHelper;
@@ -70,7 +72,7 @@ public class CalculateOrderAmountsStep implements WorkflowStep {
 
     @Override
     public CompletableFuture<Context> execute(Context context) {
-        logger.info("Workflow CalculateOrderAmountsStep Executed");
+        logger.info("Executing CalculateOrderAmountsStep Step");
 
         CompletableFuture<Context> calculateOrderAmountsStepFuture = new CompletableFuture();
 
@@ -88,6 +90,7 @@ public class CalculateOrderAmountsStep implements WorkflowStep {
 
             databaseHelper.orderCreateUpsert(context.getOrder(), context).thenAccept(aBoolean -> {
                 context.setOrderSavedInDB(Boolean.TRUE);
+                logger.info("CalculateOrderAmountsStep Step is completed");
                 calculateOrderAmountsStepFuture.complete(context);
             }).exceptionally(throwable -> {
                 // this is very crucial stage, we cannot afford not to save order at this point..
@@ -96,6 +99,10 @@ public class CalculateOrderAmountsStep implements WorkflowStep {
                 return null;
             });
 
+        }).exceptionally(throwable -> {
+            logger.info("error occurred in  CalculateOrderAmountsStep" + throwable.getMessage());
+            calculateOrderAmountsStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
+            return null;
         });
 
         return calculateOrderAmountsStepFuture;

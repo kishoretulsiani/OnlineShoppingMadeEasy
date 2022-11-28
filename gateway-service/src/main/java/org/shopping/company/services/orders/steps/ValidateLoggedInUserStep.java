@@ -34,7 +34,7 @@ public class ValidateLoggedInUserStep implements WorkflowStep {
 
     @Override
     public CompletableFuture<Context> execute(Context context) {
-        logger.info("Workflow ValidateLoggedInUserStep Executed");
+        logger.info("Executing ValidateLoggedInUserStep Step");
 
         CompletableFuture<Context> validateLoggedInUserStepFuture = new CompletableFuture();
 
@@ -50,17 +50,20 @@ public class ValidateLoggedInUserStep implements WorkflowStep {
             databaseHelper.getApplicationUser(requestUserId).thenAccept(user -> {
                 if (user != null) {
                     context.setLoggedInUser(user);
+                    logger.info("ValidateLoggedInUserStep Step completed");
                     validateLoggedInUserStepFuture.complete(context);
                 } else {
+                    logger.info("ValidateLoggedInUserStep Step completed with INVALID_USER");
                     validateLoggedInUserStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INVALID_USER.getAlertCode(), ServiceAlerts.INVALID_USER.getAlertMessage(), null));
                 }
             }).exceptionally(throwable -> {
+                logger.info("ValidateLoggedInUserStep Step completed with INVALID_USER");
                 validateLoggedInUserStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INVALID_USER.getAlertCode(), ServiceAlerts.INVALID_USER.getAlertMessage(), null));
                 return null;
             });
 
         } else {
-            logger.info("Userid in request is invalid");
+            logger.info("ValidateLoggedInUserStep Step completed with INVALID_USER");
             validateLoggedInUserStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INVALID_USER.getAlertCode(), ServiceAlerts.INVALID_USER.getAlertMessage(), null));
         }
 

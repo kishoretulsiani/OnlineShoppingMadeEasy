@@ -33,7 +33,7 @@ public class UpdateApplicationUserStep implements WorkflowStep {
 
     @Override
     public CompletableFuture<Context> execute(Context context) {
-        logger.info("Workflow Step2 Executed");
+        logger.info("Executing UpdateApplicationUserStep Step");
         CompletableFuture<Context> updateApplicationUserStepFuture = new CompletableFuture();
 
         ApplicationUser applicationUser = context.getLoggedInUser();
@@ -46,10 +46,15 @@ public class UpdateApplicationUserStep implements WorkflowStep {
 
         databaseHelper.updateApplicationUser(applicationUser, applicationUser.getUserId()).thenAccept(userUpdated -> {
             if (userUpdated) {
+                logger.info("UpdateApplicationUserStep Step completed");
                 updateApplicationUserStepFuture.complete(context);
             } else {
                 updateApplicationUserStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
             }
+        }).exceptionally(throwable -> {
+            logger.info("error occurred in  UpdateApplicationUserStep" + throwable.getMessage());
+            updateApplicationUserStepFuture.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
+            return null;
         });
 
 

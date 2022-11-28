@@ -23,7 +23,7 @@ public class InsertDummyDataRedis {
         Promise item2Promise = Promise.promise();
 
         RedisCache.getClient()
-                .set("item1", "10", result -> {
+                .set("item1", "100", result -> {
                     if (result.succeeded()) {
                         logger.info(" item1 Quantity Set in Redis");
                         item1Promise.complete();
@@ -34,7 +34,7 @@ public class InsertDummyDataRedis {
                 });
 
         RedisCache.getClient()
-                .set("item2", "10", result -> {
+                .set("item2", "100", result -> {
                     if (result.succeeded()) {
                         logger.info(" item2 Quantity Set in Redis");
                         item2Promise.complete();

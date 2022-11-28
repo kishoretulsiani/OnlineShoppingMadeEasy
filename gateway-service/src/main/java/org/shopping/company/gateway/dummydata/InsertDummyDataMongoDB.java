@@ -52,7 +52,7 @@ public class InsertDummyDataMongoDB {
         Promise<Void> ordersCollectionPromise = Promise.promise();
         MongoDB.getClient().createCollection(DBCollections.ORDERS.name(), res -> {
             if (res.succeeded()) {
-                logger.info("Collection got created successfully");
+                logger.info("ORDERS Collection got created successfully");
                 ordersCollectionPromise.complete();
             } else {
                 if (res.cause() instanceof MongoCommandException) {
@@ -74,14 +74,14 @@ public class InsertDummyDataMongoDB {
         Promise<Void> orderItemsCollectionPromise = Promise.promise();
         MongoDB.getClient().createCollection(DBCollections.ORDER_ITEMS.name(), res -> {
             if (res.succeeded()) {
-                logger.info("Collection got created successfully");
+                logger.info("ORDER_ITEMS Collection got created successfully");
                 orderItemsCollectionPromise.complete();
             } else {
                 if (res.cause() instanceof MongoCommandException) {
                     MongoCommandException exception = (MongoCommandException) res.cause();
                     if (exception.getCode() == 48) {
                         //ignore as collection already exists and no need to create a new one.
-                        logger.info("APPLICATION_USERS Collection already exists");
+                        logger.info("ORDER_ITEMS Collection already exists");
 
                         orderItemsCollectionPromise.complete();
                     }
@@ -96,7 +96,7 @@ public class InsertDummyDataMongoDB {
         Promise<Void> offersCollectionPromise = Promise.promise();
         MongoDB.getClient().createCollection(DBCollections.OFFERS.name(), res -> {
             if (res.succeeded()) {
-                logger.info("Collection got created successfully");
+                logger.info("OFFERS Collection got created successfully");
                 offersCollectionPromise.complete();
             } else {
                 if (res.cause() instanceof MongoCommandException) {
@@ -147,7 +147,7 @@ public class InsertDummyDataMongoDB {
 
         MongoDB.getClient().bulkWrite(DBCollections.APPLICATION_USERS.name(), operations, user1Result -> {
             if (user1Result.succeeded()) {
-                logger.info("user1 replaced !");
+                logger.info("data got inserted in APPLICATION_USERS collections.");
                 usersInsertPromise.complete();
             } else {
                 user1Result.cause().printStackTrace();
@@ -189,7 +189,7 @@ public class InsertDummyDataMongoDB {
 
         MongoDB.getClient().bulkWrite(DBCollections.ORDER_ITEMS.name(), itemOperations, itemResults -> {
             if (itemResults.succeeded()) {
-                logger.info("user1 replaced !");
+                logger.info("data got inserted in ORDER_ITEMS collections.");
                 itemsInsertPromise.complete();
             } else {
                 itemResults.cause().printStackTrace();
@@ -227,7 +227,7 @@ public class InsertDummyDataMongoDB {
 
         MongoDB.getClient().bulkWrite(DBCollections.OFFERS.name(), offerOperations, itemResults -> {
             if (itemResults.succeeded()) {
-                logger.info("offers replaced !");
+                logger.info("data got inserted in OFFERS collections.");
                 offersInsertPromise.complete();
             } else {
                 itemResults.cause().printStackTrace();
@@ -240,10 +240,12 @@ public class InsertDummyDataMongoDB {
                 userCollectionPromise.future(),
                 ordersCollectionPromise.future(),
                 orderItemsCollectionPromise.future(),
+                offersCollectionPromise.future(),
                 usersInsertPromise.future(),
                 itemsInsertPromise.future()
         ).setHandler(result -> {
             if (result.succeeded()) {
+                logger.info("All collections got initialized successfully!!!!.");
                 dataCreationPromise.complete();
 
             } else {

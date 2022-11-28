@@ -101,6 +101,7 @@ public class DeployVerticle extends AbstractVerticle {
 
         ResponseStatusMapper responseStatusMapper = new ResponseStatusMapper();
 
+        // initializing Http server related things
         Router router = Router.router(vertx);
         router.route().handler(BodyHandler.create());
         router.route().handler(TimeoutHandler.create(8000, 501));
@@ -113,6 +114,7 @@ public class DeployVerticle extends AbstractVerticle {
         // Starting httpserver after core components are initialized successfully.
         CompositeFuture.join(mongoFuture, redisFuture).setHandler(result -> {
             if (result.succeeded()) {
+                logger.error("Core Components got initialized successfully");
                 vertx.createHttpServer().requestHandler(router).listen(8080, ar -> {
                     if (ar.succeeded()) {
                         logger.info("HTTP server listening on port {}", 8080);
@@ -131,7 +133,7 @@ public class DeployVerticle extends AbstractVerticle {
     private void handleOrdersRequest(RoutingContext routingContext) {
         JsonObject incomingRequest = routingContext.getBodyAsJson();
         MultiMap headers = routingContext.request().headers();
-        logger.info("Order Request Received = " + incomingRequest.toString());
+        logger.info("Orders Request Received = " + incomingRequest.toString());
         routingContext.put("apiName", "handleOrdersRequest");
         routingContext.put("startTime", System.currentTimeMillis());
         ordersService.createOrder(incomingRequest, ResponseHandler.responseHandler(routingContext));

@@ -22,12 +22,12 @@ import java.util.concurrent.CompletableFuture;
 
 
 @RunWith(JUnit4.class)
-public class CreateOrderStepTest {
+public class CreateOrderResponseStepTest {
 
     DatabaseHelper databaseHelper;
     DTOHelper dtoHelper;
     RedisHelper redisHelper;
-    CreateOrderStep createOrderStep;
+    CreateOrderResponseStep createOrderResponseStep;
 
 
     @Before
@@ -38,7 +38,7 @@ public class CreateOrderStepTest {
 
         redisHelper = EasyMock.createNiceMock(RedisHelper.class);
 
-        createOrderStep = new CreateOrderStep(databaseHelper, dtoHelper, redisHelper);
+        createOrderResponseStep = new CreateOrderResponseStep(databaseHelper, dtoHelper, redisHelper);
     }
 
     @After
@@ -63,7 +63,7 @@ public class CreateOrderStepTest {
         EasyMock.expect(databaseHelper.orderCreateUpsert(EasyMock.anyObject(), EasyMock.anyObject())).andReturn(dbUpdateOrder);
         EasyMock.replay(databaseHelper);
 
-        CompletableFuture<Context> completableFuture = createOrderStep.execute(context);
+        CompletableFuture<Context> completableFuture = createOrderResponseStep.execute(context);
         completableFuture.join();
         Assert.assertTrue(completableFuture.isDone());
 
@@ -87,7 +87,7 @@ public class CreateOrderStepTest {
         EasyMock.expect(databaseHelper.orderCreateUpsert(EasyMock.anyObject(), EasyMock.anyObject())).andReturn(dbUpdateOrder);
         EasyMock.replay(databaseHelper);
 
-        CompletableFuture<Context> completableFuture = createOrderStep.execute(context);
+        CompletableFuture<Context> completableFuture = createOrderResponseStep.execute(context);
         Assert.assertTrue(completableFuture.isCompletedExceptionally());
 
     }

@@ -4,6 +4,7 @@ package org.shopping.common.components.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.shopping.common.components.constants.ServiceAlerts;
 import org.shopping.common.components.exception.ApplicationException;
 
 public class JsonUtility {
@@ -24,7 +25,7 @@ public class JsonUtility {
         try {
             return this.mapper.readValue(jsonString, objectClass);
         } catch (Exception var4) {
-            throw new ApplicationException(1002, "Error mapping string to class, caused by " + var4.getMessage(), var4);
+            throw new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), "Error mapping string to class, caused by " + var4.getMessage(), var4);
         }
     }
 
@@ -36,7 +37,7 @@ public class JsonUtility {
         try {
             return mapper.writeValueAsString(object);
         } catch (Exception var4) {
-            throw new ApplicationException(1002, "Error writing object as snake case string, caused by " + var4.getMessage(), var4);
+            throw new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), "Error writing object as snake case string, caused by " + var4.getMessage(), var4);
         }
     }
 }

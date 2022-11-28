@@ -26,6 +26,8 @@ public class ExceptionHandler implements Handler<RoutingContext> {
     @Override
     public void handle(RoutingContext routingContext) {
 
+        logger.error("ExceptionHandler is getting executed");
+
         ResponseStatus responseStatus;
 
         int httpStatusCode;
@@ -33,7 +35,7 @@ public class ExceptionHandler implements Handler<RoutingContext> {
         Throwable throwable = routingContext.failure();
 
         if (throwable instanceof ServiceException) {
-            logger.error("ApplicationException occurred  " + throwable.getMessage());
+            logger.error("ServiceException occurred  " + throwable.getMessage());
             ServiceException exception = (ServiceException) throwable;
             JsonObject errorInfo = exception.getDebugInfo();
             responseStatus = responseStatusMapper.mapErrorCode(errorInfo.getInteger("status_code"));

@@ -2,6 +2,8 @@ package org.shopping.company.services.orders.steps;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.shopping.common.components.constants.ServiceAlerts;
+import org.shopping.common.components.exception.ApplicationException;
 import org.shopping.company.services.orders.helpers.DTOHelper;
 import org.shopping.company.services.orders.helpers.DatabaseHelper;
 import org.shopping.company.services.orders.helpers.RedisHelper;
@@ -34,7 +36,7 @@ public class ApplyOffersStep implements WorkflowStep {
 
     @Override
     public CompletableFuture<Context> execute(Context context) {
-        logger.info("Workflow ApplyOffersStep Executed");
+        logger.info("Executing ApplyOffersStep Step");
 
         CompletableFuture<Context> applyOffersStep = new CompletableFuture();
 
@@ -50,8 +52,13 @@ public class ApplyOffersStep implements WorkflowStep {
                 recalculateOrderSummary(orderAmountSummary, discountAmount);
             }
 
+            logger.info("ApplyOffersStep Step is completed");
             applyOffersStep.complete(context);
 
+        }).exceptionally(throwable -> {
+            logger.info("error occurred in  ApplyOffersStep" + throwable.getMessage());
+            applyOffersStep.completeExceptionally(new ApplicationException(ServiceAlerts.INTERNAL_ERROR.getAlertCode(), ServiceAlerts.INTERNAL_ERROR.getAlertMessage(), null));
+            return null;
         });
 
         return applyOffersStep;

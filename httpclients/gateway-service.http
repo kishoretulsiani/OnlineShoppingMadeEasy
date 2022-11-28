@@ -25,7 +25,7 @@ Content-Type: application/json
 }
 
 ###
-##### retreive ALL Orders for a user
+##### Retreive ALL Orders for a user
 POST {{gateway-service-host}}/shopping/company/retrieve/orders
 x-tracking-id: {{$uuid}}
 Content-Type: application/json
@@ -35,7 +35,7 @@ Content-Type: application/json
 }
 
 ####
-##### retreive particular Order for a user
+##### Retreive particular Order for a user
 POST {{gateway-service-host}}/shopping/company/retrieve/orders
 x-tracking-id: {{$uuid}}
 Content-Type: application/json
